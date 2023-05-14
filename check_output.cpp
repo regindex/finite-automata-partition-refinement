@@ -29,14 +29,24 @@ int main(int argc, char** argv)
   {
     std::ifstream input(argv[1]);
     
-    if( verb ) std::cout << "initialize NFA...\n";
+    #ifdef VERBOSE
+    {
+      std::cout << "initialize NFA...\n";
+    }
+    #endif
+
     // initialize the NFA
     NFA = graph(n);
 
     std::string line;
     const char delim = ' ';
 
-    if( verb ){ std::cout << "Edges list:\n"; }
+    #ifdef VERBOSE
+    {
+      std::cout << "Edges list:\n";
+    }
+    #endif
+
     while(std::getline(input, line))
     {
       std::vector<std::string> out; 
@@ -46,7 +56,12 @@ int main(int argc, char** argv)
       uint_t origin = stoul(out[0].substr(2, out[0].size())) - sc;
       uint_t dest = stoul(out[2].substr(1, out[2].size())) - sc;
       int label = stoi(out[6]) + 1;
-      if( verb ) std::cout << origin << " " << dest << " " << label << "\n";
+
+      #ifdef VERBOSE
+      {
+        std::cout << origin << " " << dest << " " << label << "\n";
+      }
+      #endif
 
       NFA.add_edge(origin, dest, label);
     }
@@ -97,7 +112,7 @@ int main(int argc, char** argv)
       }
     }
 
-    if( verb )
+    #ifdef VERBOSE
     {
       std::cout << "######curr: " << curr << "\n";
       std::cout << "i: " << i << "\n";
@@ -105,10 +120,17 @@ int main(int argc, char** argv)
       std::cout << "curr max: " << max << "\n";
       std::cout << "prev max: " << prev_max << "\n";
     }
+    #endif
 
     for(uint_t j=0;j<NFA.at(curr)->in.size();++j){
       uint_t curr_isa = ISA[NFA.at(curr)->in[j]];
-      if( verb ) std::cout << "current isa: " << curr_isa << "\n";
+
+      #ifdef VERBOSE
+      {
+        std::cout << "current isa: " << curr_isa << "\n";
+      }
+      #endif
+      
       if( curr_isa > max ){ max = curr_isa; }
 
       if( max < prev_max ){ std::cout << "Not Wheeler in: " << i << "\n"; exit(1); }

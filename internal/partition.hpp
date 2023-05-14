@@ -34,14 +34,15 @@ public:
 	// empty constructor
 	partition(){}
 	// constructor 
-	partition(int sigma, std::vector<std::tuple<uint_t,uint_t,int>>& edge_list){
+	partition(int sigma, uint_t source, std::vector<std::tuple<uint_t,uint_t,int>>& edge_list){
 
 		// label pointer vector initialization
 		spoint.resize(sigma);
 		// initialize head
 		head = new part();
 		head->nodes = new std::unordered_set<uint_t>;
-		head->nodes->insert(0);
+		////head->nodes->insert(0);
+		head->nodes->insert(source);
 		head->prev = nullptr;
 		spoint[0] = head;
 		// initialize other initial parts
@@ -69,14 +70,15 @@ public:
 	  	set_first_C_block();
 	}
 	// constructor 
-	partition(int sigma){
+	partition(int sigma, uint_t source){
 
 		// label pointer vector initialization
 		spoint.resize(sigma);
 		// initialize head
 		head = new part();
 		head->nodes = new std::unordered_set<uint_t>;
-		head->nodes->insert(0);
+		////head->nodes->insert(0);
+		head->nodes->insert(source);
 		head->prev = nullptr;
 		spoint[0] = head;
 		// initialize other initial parts
@@ -111,6 +113,7 @@ public:
 				if(curr->nodes->size() > 0)
 				{
 					prev->next = curr; 
+					curr->prev = prev;
 					firstC->second = curr;
 				}
 				else
@@ -124,6 +127,7 @@ public:
 			if(curr->nodes->size() > 0)
 			{
 				prev->next = curr;
+				curr->prev = prev;
 				prev = curr;
 				curr = curr->next;
 			}
@@ -166,6 +170,7 @@ public:
 		}
 
 		uint_t size_first, size_last;
+		// problema su 172
 		size_first = S->first->nodes->size();
 		size_last = S->second->nodes->size();
 
@@ -247,6 +252,20 @@ public:
         		std::cout << i << " ";
     		}
     		std::cout << "|| ";
+    		if(curr->next == nullptr){ break; }
+    		curr = curr->next;
+		}
+		std::cout << '\n';
+	}
+
+	void print_partition_size()
+	{
+		part* curr = head;
+		std::cout << "|| ";
+		while(true)
+		{
+			std::cout << curr->nodes->size();
+    		std::cout << " || ";
     		if(curr->next == nullptr){ break; }
     		curr = curr->next;
 		}

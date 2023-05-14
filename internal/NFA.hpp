@@ -94,6 +94,31 @@ public:
 		counts.shrink_to_fit();
 	}
 
+	/*
+		function to print P to file
+	*/
+	void to_file(std::string out)
+	{
+		std::ofstream ofile;
+		ofile.open(out); 
+		ofile << "strict digraph  {" << std::endl;
+		//ofile_DOT << "\t" << to_string(edge.get_tail_label()) << " -> " << to_string(edge.get_head_label()) << " [label=" << this->get_decoded_label(edge.get_label()) << "];" << endl;
+		for(uint_t i=0;i<NFA.size();++i)
+		{
+			for(uint_t j=0;j<NFA[i].out.size();++j)
+			{
+				if( *NFA[i].count[j] > 0 )
+				{
+					//ofile << "\t" << "S" << i << " -> " << "S" << NFA[i].out[j] << " [label=" << "];" << std::endl;
+					ofile << "\t" << "S" << i << " -> " << "S" << NFA[i].out[j] << std::endl;
+				}
+			}
+		}
+		ofile << "}";
+		// close output file
+		ofile.close();
+	}
+
 private:
 	// number of nodes in the DFA
 	uint_t nodes;

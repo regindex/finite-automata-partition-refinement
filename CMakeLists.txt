@@ -47,9 +47,21 @@ include_directories(${PROJECT_SOURCE_DIR})
 add_executable(part-ref32.x exe.cpp lib/part_ref.cpp internal/NFA.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
 target_link_libraries(part-ref32.x dl)
 
+add_executable(part-ref32-verb.x exe.cpp lib/part_ref.cpp internal/NFA.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
+target_link_libraries(part-ref32-verb.x dl)
+target_compile_options(part-ref32-verb.x PUBLIC "-DVERBOSE")
+
 add_executable(part-ref64.x exe.cpp lib/part_ref.cpp internal/NFA.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
 target_link_libraries(part-ref64.x dl)
 target_compile_options(part-ref64.x PUBLIC "-DM64")
 
+add_executable(part-ref64-verb.x exe.cpp lib/part_ref.cpp internal/NFA.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
+target_link_libraries(part-ref64-verb.x dl)
+target_compile_options(part-ref64-verb.x PUBLIC "-DM64" "-DVERBOSE")
+
 add_executable(check32.x check_output.cpp internal/NFA.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
 target_link_libraries(check32.x dl)
+
+add_executable(check32-verb.x check_output.cpp internal/NFA.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
+target_link_libraries(check32-verb.x dl)
+target_compile_options(check32-verb.x PUBLIC "-DVERBOSE")
