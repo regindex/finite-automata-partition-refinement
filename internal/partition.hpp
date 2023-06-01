@@ -96,6 +96,12 @@ public:
 		prev->next = nullptr;
 	}
 
+	void add_source(uint_t source){
+
+		// add new source to head node
+		head->nodes->insert(source);
+	}
+
 	void set_first_C_block(){
 
 		// instantiate first compound block

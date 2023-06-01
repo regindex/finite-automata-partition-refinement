@@ -18,10 +18,12 @@ def main():
     parser = argparse.ArgumentParser(description=Description, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('input', help='input dot file name', type=str)
     parser.add_argument('-o', help='output files basename (def. tmp.part)', default = "tmp.part", type=str)
-    parser.add_argument('--DFA', help='take in input an arbitrary DFA (def. False)', action='store_true')
-    parser.add_argument('--idbase1', help='activate if initial state is labelled with 1 (def. False)', action='store_true')
-    parser.add_argument('--intfile', help='take in input an intermediate file (def. False)', action='store_true')
-    parser.add_argument('--check', help='check output correctness (def. False)', action='store_true')
+    parser.add_argument('--pruning', help='run the pruning algorithm (def. False)', action='store_true')
+    parser.add_argument('--ascii', help='use the ascii alphabet (def. False)', action='store_true')
+    #parser.add_argument('--source', help='source state id (def. 0)', default=0, type=int)
+    parser.add_argument('--idbase1', help='activate if state ids start from 1 (def. False)', action='store_true')
+    parser.add_argument('--intermediate', help='take in input an intermediate file (def. False)', action='store_true')
+    parser.add_argument('--check', help='check order Wheelerness (def. False)', action='store_true')
     parser.add_argument('--verbose',  help='verbose mode on (def. False)',action='store_true')
     args = parser.parse_args()
 
@@ -30,10 +32,25 @@ def main():
     args.main_dir = os.path.split(sys.argv[0])[0]
     print("Sending logging messages to file:", logfile_name)
 
-    command = "gc {input} -n".format(input=args.input)
-    print("Counting number of nodes in " + args.input + " file...")
-    out = subprocess.check_output(command.split())
-    no_nodes = int(out.split()[0])
+    # compute number of nodes and source state
+    # for dot file we assume the source state is labelled either with 0 or 1
+    no_nodes = 0
+    if( not args.intermediate ):
+        command = "gc {input} -n".format(input=args.input)
+        print("Counting number of nodes in " + args.input + " file...")
+        out = subprocess.check_output(command.split())
+        no_nodes = int(out.split()[0])
+    else:
+        with open(args.input, "rb") as file:
+            try:
+                file.seek(-2, os.SEEK_END)
+                while file.read(1) != b'\n':
+                    file.seek(-2, os.SEEK_CUR) 
+            except OSError:
+                file.seek(0)
+            last_line = file.readline().decode()
+            no_nodes = int(last_line.split(" ")[0])
+            args.source = int(last_line.split(" ")[2])
     
     with open(logfile_name,"a") as logfile:
 
@@ -43,47 +60,56 @@ def main():
 
             print("Running in 32 bit mode.")
             if(not args.verbose):
-                command = "{exe} {file} {ofile} {nodes}".format(
+                command = "{exe} {file} {ofile} {nodes} {source}".format(
                         exe = os.path.join(args.main_dir,partref32_exe),
-                        file=args.input, ofile = args.o, nodes=no_nodes)
+                        file=args.input, ofile = args.o, nodes=no_nodes,
+                        source=args.source)
             else:
-                command = "{exe} {file} {ofile} {nodes}".format(
+                command = "{exe} {file} {ofile} {nodes} {source}".format(
                         exe = os.path.join(args.main_dir,partref32_verb_exe),
-                        file=args.input, ofile = args.o, nodes=no_nodes)     
+                        file=args.input, ofile = args.o, nodes=no_nodes,
+                        source=args.source)     
 
         else:
 
             print("Running in 64 bit mode.")
             if(not args.verbose):
-                command = "{exe} {file} {ofile} {nodes}".format(
+                command = "{exe} {file} {ofile} {nodes} {source}".format(
                         exe = os.path.join(args.main_dir,partref64_exe),
-                        file=args.input, ofile = args.o, nodes=no_nodes)
+                        file=args.input, ofile = args.o, nodes=no_nodes,
+                        source=args.source)
             else:
-                command = "{exe} {file} {ofile} {nodes}".format(
+                command = "{exe} {file} {ofile} {nodes} {source}".format(
                         exe = os.path.join(args.main_dir,partref64_verb_exe),
-                        file=args.input, ofile = args.o, nodes=no_nodes)
+                        file=args.input, ofile = args.o, nodes=no_nodes,
+                        source=args.source)
 
         if(args.idbase1):
             command += " 1"
         else:
             command += " 0"
 
-        if(args.DFA):
+        if(args.pruning):
             command += " 1"
         else:
             command += " 0"
 
-        if(args.intfile):
+        if(args.ascii):
+            command += " 1"
+        else:
+            command += " 0"
+
+        if(args.intermediate):
             command += " 0"
         else:
             command += " 1"
 
         command += " 1"
 
-        if( args.DFA ):
-            print("==== sorting NFA. Command: ", command)
+        if( args.pruning ):
+            print("==== running the partition refinement algorithm. Command: ", command)
         else:
-            print("==== sorting DFA. Command: ", command)
+            print("==== running the pruning algorithm. Command: ", command)
 
         if(execute_command(command,logfile,logfile_name)!=True):
             return
@@ -98,6 +124,7 @@ def main():
                 command += " 1"
             else:
                 command += " 0"
+
             if(args.verbose):
                 command += " 1"
             else:

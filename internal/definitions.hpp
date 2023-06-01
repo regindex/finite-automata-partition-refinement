@@ -2,6 +2,7 @@
 #define DEFINITIONS_H
 
 #include <cstdint>
+#include <string>
 #include <cassert>
 #include <vector>
 #include <unordered_set>
@@ -23,8 +24,10 @@
     #define I_MAX   INT64_MAX
 #endif
 
-// DNA alfabeth
+// DNA alphabet
 const static int sigma = 6;
+// ASCII alphabet
+const static int sigma_ascii = 128;
 
 // conversion table
 const static unsigned char seq_nt6_table[128] = {

@@ -65,3 +65,10 @@ target_link_libraries(check32.x dl)
 add_executable(check32-verb.x check_output.cpp internal/NFA.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
 target_link_libraries(check32-verb.x dl)
 target_compile_options(check32-verb.x PUBLIC "-DVERBOSE")
+
+add_executable(merge32.x merge.cpp lib/part_ref.cpp internal/NFA.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
+target_link_libraries(merge32.x dl)
+
+add_executable(merge32-verb.x merge.cpp lib/part_ref.cpp internal/NFA.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
+target_link_libraries(merge32-verb.x dl)
+target_compile_options(merge32-verb.x PUBLIC "-DVERBOSE")

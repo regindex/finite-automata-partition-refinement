@@ -95,9 +95,9 @@ public:
 	}
 
 	/*
-		function to print P to file
+		function to print P to dot file
 	*/
-	void to_file(std::string out)
+	void to_dot(std::string out)
 	{
 		std::ofstream ofile;
 		ofile.open(out); 
@@ -115,6 +115,67 @@ public:
 			}
 		}
 		ofile << "}";
+		// close output file
+		ofile.close();
+	}
+
+	/*
+		function to store node positios in the partition
+	*/
+	void store_state_intervals(std::string out, partition& P, uint_t n)
+	{
+		std::ofstream ofile;
+		ofile.open(out); 
+		part* curr = P.give_head();
+		uint_t s = 0;
+		// visit partition P and compute state positions
+		while(true)
+		{
+			for (auto const &i: *curr->nodes)
+			{
+        		//std::cout << i << " ";
+        		if(NFA[i].out.size() > 0)
+        		{
+        			NFA[i].out[0] = s;
+        		}
+        		else
+        		{
+        			NFA[i].out.push_back(s);
+        		}
+    		}
+    		if(curr->next == nullptr){ break; }
+    		s++;
+    		curr = curr->next;
+		}
+		// write state intervals
+		for(uint_t i=0;i<n;++i)
+		{
+		  ofile << NFA[i].out[0] << "\t" << NFA[i+n].out[0] << "\n";
+		}
+		// close output file
+		ofile.close();
+	}
+
+	/*
+		function to print P to dot file
+	*/
+	template<typename T>
+	void to_intermediate(std::string out, std::vector<T>& labels)
+	{
+		std::ofstream ofile;
+		ofile.open(out); 
+		// scan the graph
+		for(uint_t i=0;i<NFA.size();++i)
+		{
+			for(uint_t j=0;j<NFA[i].out.size();++j)
+			{
+				if( *NFA[i].count[j] > 0 )
+				{
+					//ofile << i << " " << NFA[i].out[j] << " " << labels[NFA[i].out[j]] << "\n";
+					ofile << i << " " << labels[NFA[i].out[j]] << " " << NFA[i].out[j] << "\n";
+				}
+			}
+		}
 		// close output file
 		ofile.close();
 	}

@@ -14,7 +14,7 @@ void tokenize(std::string const &str, const char delim,
 }
 
 // simple parse for dot files; it reads the input line by line
-void parse_dot(std::string input_file, partition& P, graph& NFA, uint_t sc)
+void parse_dot(std::string input_file, partition& P, graph& Aut, uint_t sc)
 {
     // open stream to input
     std::ifstream input(input_file);
@@ -36,19 +36,19 @@ void parse_dot(std::string input_file, partition& P, graph& NFA, uint_t sc)
       label = stoi(out[6]) + 1;
 
       P.add_node(dest, label);
-      NFA.add_edge(origin, dest, label, P);
+      Aut.add_edge(origin, dest, label, P);
     }
     // close stream to input file
     input.close();
 }  
 
 // simple parser for intermediate file; it reads line by line origin \t destination \t label \n
-void parse_intermediate(std::string input_file, partition& P, graph& NFA, uint_t sc)
+void parse_intermediate(std::string input_file, partition& P, graph& Aut, uint_t sc, bool dna, bool invert)
 {
     // open stream to input
     std::ifstream input(input_file);
     std::string line;
-    const char delim = '\t';
+    const char delim = ' ';
     uint_t origin, dest;
     int label;
     std::vector<std::string> out; 
@@ -62,10 +62,49 @@ void parse_intermediate(std::string input_file, partition& P, graph& NFA, uint_t
 
       origin = stoul(out[0]) - sc;
       dest = stoul(out[1]) - sc;
-      label = (int)seq_nt6_table[(int)out[2][0]];
+      label = (int)out[2][0];
+      //std::cout << origin << " " << label << " " << dest << "\n";
+      if( dna )
+      {
+        if(invert){ label = (int)inv_seq_nt6_table[label]; } 
+        else{ label = (int)seq_nt6_table[label]; }
+      }
+      else if( invert ){ label = 127 - label; }
+
+      //std::cout << "label: " << label << "\n";
+      //label = (int)seq_nt6_table[(int)out[2][0]];
+
+      //std::cout << origin << " " << label << " " << dest << "\n";
 
       P.add_node(dest, label);
-      NFA.add_edge(origin, dest, label, P);
+      Aut.add_edge(origin, dest, label, P);
+    }
+    // close stream to input file
+    input.close();
+}  
+
+// simple parser for intermediate file; it reads line by line origin \t destination \t label \n
+void get_labels(std::string input_file, std::vector<char>& labels, uint_t sc)
+{
+    // open stream to input
+    std::ifstream input(input_file);
+    std::string line;
+    const char delim = ' ';
+    uint_t dest;
+    int label;
+    std::vector<std::string> out; 
+
+    while(std::getline(input, line))
+    {
+      std::vector<std::string> out; 
+      tokenize(line, delim, out); 
+      
+      if(out.size() != 3){ continue; }
+
+      dest = stoul(out[1]) - sc;
+      label = out[2][0];
+
+      labels[dest] = label;
     }
     // close stream to input file
     input.close();
@@ -75,43 +114,51 @@ int main(int argc, char** argv)
 {
   // read command line arguments
   partition P;
-  graph NFA;
+  graph Aut;
   std::string out_file, in_file;
-  uint_t n, sc, origin;
-  bool dfa, write_output, dot_format;
+  uint_t n, sc, source;
+  bool pruning, write_output, dot_format, ascii, suprema;
   // read input from file
-  if(argc > 7)
+  if(argc > 10)
   { 
     // set input parameters
     in_file = std::string(argv[1]);
     out_file = std::string(argv[2]);
-    n = atoll(argv[3]);
-    sc = atoi(argv[4]);
-    dfa = atoi(argv[5]);
-    dot_format = atoi(argv[6]);
-    write_output = atoi(argv[7]);
+    n = std::stoull(argv[3]);
+    source = std::stoull(argv[4]);
+    sc = atoi(argv[5]);
+    pruning = atoi(argv[6]);
+    suprema = atoi(argv[7]);
+    ascii = atoi(argv[8]);
+    dot_format = atoi(argv[9]);
+    write_output = atoi(argv[10]);
 
     #ifdef VERBOSE
     {
       std::cout << "initialize first partition...\n";
     }
     #endif
-    // set source state label; assume initial state has id zero
-    origin = 0;
     // initialize the initial partition
-    P = partition(sigma,origin);
+    if( ascii ){ P = partition(sigma_ascii,source); }
+    else{        P = partition(sigma,source); }
     #ifdef VERBOSE
     {
-      std::cout << "initialize NFA...\n";
+      std::cout << "initialize automaton...\n";
     }
     #endif
-    // initialize the NFA
-    NFA = graph(n);
+    // initialize the automaton
+    Aut = graph(n);
 
-    if( dot_format ){ parse_dot(in_file,P,NFA,sc); }
-    else{ parse_intermediate(in_file,P,NFA,sc); }
+    if( dot_format ){ parse_dot(in_file,P,Aut,sc); } // TODO ascii and dna alphabet selection for dot
+    else
+    {
+      ascii = !ascii;
+      parse_intermediate(in_file,P,Aut,sc,ascii,suprema); 
+      //if( ascii ){  parse_intermediate(in_file,P,Aut,sc,false); }
+      //else{         parse_intermediate(in_file,P,Aut,sc,true); }
+    }
 
-    NFA.delete_counts();
+    Aut.delete_counts();
     P.delete_spoint();
 
     P.set_first_C_block();
@@ -119,23 +166,33 @@ int main(int argc, char** argv)
   else{ std::cerr << "invalid no. arguments\n"; exit(1); }
 
   // run partition refinement algorithm
-  if( dfa )
+  if( pruning )
   {
-      std::cout << "Start sorting DFA\n";
-      partition_refinement_DFA(P, NFA);
+      std::cout << "Start sorting automaton using Pruning algorithm\n";
+      partition_refinement_DFA(P, Aut);
 
       // print the output
       if( write_output )
       {
-        P.to_file(out_file);
+          // write partition to file
+          P.to_file(out_file);
 
-        NFA.to_file(std::string(argv[1])+".pruned");
+          if( dot_format )
+          {
+              Aut.to_dot(out_file+".pruned");
+          }
+          else
+          {
+              std::vector<char> labels(n, '$');
+              get_labels(in_file,labels,sc);
+              Aut.to_intermediate(out_file+".pruned", labels);
+          }
       }
   }
   else
   {
-      std::cout << "Start sorting NFA\n";
-      partition_refinement_NFA(P, NFA);
+      std::cout << "Start sorting Wheeler automaton using Partition refinement algorithm\n";
+      partition_refinement_NFA(P, Aut);
 
       // print the output
       if( write_output )
