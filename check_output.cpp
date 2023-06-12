@@ -1,5 +1,5 @@
 // include NFA header
-#include "internal/NFA.hpp"
+#include "internal/Automaton.hpp"
 
 typedef NFA_unidirectional_in_unlabelled graph; 
 

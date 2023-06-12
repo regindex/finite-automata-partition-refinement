@@ -63,18 +63,13 @@ void parse_intermediate(std::string input_file, partition& P, graph& Aut, uint_t
       origin = stoul(out[0]) - sc;
       dest = stoul(out[1]) - sc;
       label = (int)out[2][0];
-      //std::cout << origin << " " << label << " " << dest << "\n";
+
       if( dna )
       {
         if(invert){ label = (int)inv_seq_nt6_table[label]; } 
         else{ label = (int)seq_nt6_table[label]; }
       }
       else if( invert ){ label = 127 - label; }
-
-      //std::cout << "label: " << label << "\n";
-      //label = (int)seq_nt6_table[(int)out[2][0]];
-
-      //std::cout << origin << " " << label << " " << dest << "\n";
 
       P.add_node(dest, label);
       Aut.add_edge(origin, dest, label, P);
@@ -152,8 +147,8 @@ int main(int argc, char** argv)
     if( dot_format ){ parse_dot(in_file,P,Aut,sc); } // TODO ascii and dna alphabet selection for dot
     else
     {
-      ascii = !ascii;
-      parse_intermediate(in_file,P,Aut,sc,ascii,suprema); 
+      //ascii = !ascii;
+      parse_intermediate(in_file,P,Aut,sc,!ascii,suprema); 
       //if( ascii ){  parse_intermediate(in_file,P,Aut,sc,false); }
       //else{         parse_intermediate(in_file,P,Aut,sc,true); }
     }
@@ -175,18 +170,19 @@ int main(int argc, char** argv)
       if( write_output )
       {
           // write partition to file
-          P.to_file(out_file);
+          // P.to_file(out_file);
 
-          if( dot_format )
-          {
-              Aut.to_dot(out_file+".pruned");
-          }
-          else
-          {
-              std::vector<char> labels(n, '$');
-              get_labels(in_file,labels,sc);
-              Aut.to_intermediate(out_file+".pruned", labels);
-          }
+          //if( dot_format )
+          //{
+          //    Aut.to_dot(out_file+".pruned");
+          //}
+          //else
+          //{
+          std::vector<char> labels(n, '$');
+          get_labels(in_file,labels,sc);
+          //Aut.to_intermediate(out_file+".pruned", labels);
+          Aut.to_intermediate(out_file, labels);
+          //}
       }
   }
   else

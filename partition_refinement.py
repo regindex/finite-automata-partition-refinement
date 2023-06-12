@@ -16,14 +16,15 @@ check32_verb_exe       =  os.path.join(dirname, "build/check32-verb.x")
 
 def main():
     parser = argparse.ArgumentParser(description=Description, formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('input', help='input dot file name', type=str)
-    parser.add_argument('-o', help='output files basename (def. tmp.part)', default = "tmp.part", type=str)
+    parser.add_argument('input', help='input automaton file name', type=str)
+    parser.add_argument('-o', help='output files basename (def. filename.part)', default = "", type=str)
     parser.add_argument('--pruning', help='run the pruning algorithm (def. False)', action='store_true')
+    parser.add_argument('--suprema', help='Only for --pruning, compute suprema strings pruned DFA (def. False)', action='store_true')
     parser.add_argument('--ascii', help='use the ascii alphabet (def. False)', action='store_true')
-    #parser.add_argument('--source', help='source state id (def. 0)', default=0, type=int)
+    parser.add_argument('--source', help='Only for .dot inputs, define the source state (def. 0)', default = 0, type=int)
     parser.add_argument('--idbase1', help='activate if state ids start from 1 (def. False)', action='store_true')
     parser.add_argument('--intermediate', help='take in input an intermediate file (def. False)', action='store_true')
-    parser.add_argument('--check', help='check order Wheelerness (def. False)', action='store_true')
+    #parser.add_argument('--check', help='check order Wheelerness (def. False)', action='store_true')
     parser.add_argument('--verbose',  help='verbose mode on (def. False)',action='store_true')
     args = parser.parse_args()
 
@@ -31,6 +32,9 @@ def main():
     # get main directory
     args.main_dir = os.path.split(sys.argv[0])[0]
     print("Sending logging messages to file:", logfile_name)
+    if(args.o == ""):
+        if(args.pruning): args.o = args.input + ".pruned"
+        else: args.o = args.input + ".part"
 
     # compute number of nodes and source state
     # for dot file we assume the source state is labelled either with 0 or 1
@@ -94,6 +98,11 @@ def main():
         else:
             command += " 0"
 
+        if(args.suprema):
+            command += " 1"
+        else:
+            command += " 0"
+
         if(args.ascii):
             command += " 1"
         else:
@@ -114,7 +123,7 @@ def main():
         if(execute_command(command,logfile,logfile_name)!=True):
             return
         print("Elapsed time: {0:.4f}".format(time.time()-start))
-
+        '''
         if( args.check ):
             command = "{exe} {input} {order} {nodes}".format(
                         exe = os.path.join(args.main_dir,check32_exe),
@@ -134,8 +143,7 @@ def main():
             if(execute_command(command,logfile,logfile_name)!=True):
                 return
             print("Elapsed time: {0:.4f}".format(time.time()-start))
-
-
+        '''
 
 # execute command: return True is everything OK, False otherwise
 def execute_command(command,logfile,logfile_name,env=None):
