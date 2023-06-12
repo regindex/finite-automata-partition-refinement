@@ -1,8 +1,8 @@
-# WNFA-partition-refinement
+# finite-automata-partition-refinement
 
 ### Description
 
-This is a tool to sort Wheeler NFAs using the partition refinement algorithm.
+This is a tool to sort Wheeler NFAs and input consistent DFAs using the partition refinement algorithm.
 
 ### Requirements
 
@@ -15,8 +15,8 @@ This is a tool to sort Wheeler NFAs using the partition refinement algorithm.
 To clone the repository, run:
 
 ```console
-git clone http://github.com/regindex/WNFA-partition-refinement
-cd WNFA-partition-refinement
+git clone http://github.com/regindex/finite_automata-partition-refinement
+cd finite-automata-partition-refinement
 git submodule update --init --recursive
 ```
 
