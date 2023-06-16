@@ -3,26 +3,26 @@
 import sys, time, argparse, subprocess, os.path
 
 Description = """
-Tool to sort finite automata using partition refinement algorithm.
+Tool to sort and prune finite automata using partition refinement algorithm.
 """
 
 dirname = os.path.dirname(os.path.abspath(__file__))
 partref32_exe     =  os.path.join(dirname, "build/part-ref32.x")
 partref64_exe     =  os.path.join(dirname, "build/part-ref64.x")
-check32_exe       =  os.path.join(dirname, "build/check32.x")
+#check32_exe       =  os.path.join(dirname, "build/check32.x")
 partref32_verb_exe     =  os.path.join(dirname, "build/part-ref32-verb.x")
 partref64_verb_exe     =  os.path.join(dirname, "build/part-ref64-verb.x")
-check32_verb_exe       =  os.path.join(dirname, "build/check32-verb.x")
+#check32_verb_exe       =  os.path.join(dirname, "build/check32-verb.x")
 
 def main():
     parser = argparse.ArgumentParser(description=Description, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('input', help='input automaton file name', type=str)
-    parser.add_argument('-o', help='output files basename (def. filename.part)', default = "", type=str)
-    parser.add_argument('--pruning', help='run the pruning algorithm (def. False)', action='store_true')
-    parser.add_argument('--suprema', help='Only for --pruning, compute suprema strings pruned DFA (def. False)', action='store_true')
-    parser.add_argument('--ascii', help='use the ascii alphabet (def. False)', action='store_true')
+    parser.add_argument('-o', help='output file basename (def. filename.part)', default = "", type=str)
+    parser.add_argument('--pruning', help='compute pruned automaton recognizing infimum strings (def. False)', action='store_true')
+    #parser.add_argument('--suprema', help='Only for --pruning, compute suprema strings pruned DFA (def. False)', action='store_true')
+    parser.add_argument('--ascii', help='use ascii alphabet to encode edge labels rather than DNA alphabet (def. False)', action='store_true')
     parser.add_argument('--source', help='Only for .dot inputs, define the source state (def. 0)', default = 0, type=int)
-    parser.add_argument('--idbase1', help='activate if state ids start from 1 (def. False)', action='store_true')
+    parser.add_argument('--idbase1', help='activate if state ids start from 1 rather than from 0 (def. False)', action='store_true')
     parser.add_argument('--intermediate', help='take in input an intermediate file (def. False)', action='store_true')
     #parser.add_argument('--check', help='check order Wheelerness (def. False)', action='store_true')
     parser.add_argument('--verbose',  help='verbose mode on (def. False)',action='store_true')
@@ -35,6 +35,7 @@ def main():
     if(args.o == ""):
         if(args.pruning): args.o = args.input + ".pruned"
         else: args.o = args.input + ".part"
+    args.suprema = False
 
     # compute number of nodes and source state
     # for dot file we assume the source state is labelled either with 0 or 1

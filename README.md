@@ -2,7 +2,7 @@
 
 ### Description
 
-This is a tool to sort Wheeler NFAs and input consistent DFAs using the partition refinement algorithm.
+This is a tool to sort Wheeler NFAs and prune input consistent automata using the partition refinement algorithm.
 
 ### Requirements
 
@@ -61,24 +61,23 @@ or using an intermediate format, one edge per line plus the last line containing
 ### Usage
 
 ```
-usage: partition_refinement.py [-h] [-o O] [--pruning] [--suprema] [--ascii]
+usage: partition_refinement.py [-h] [-o O] [--pruning] [--ascii]
                                [--source SOURCE] [--idbase1] [--intermediate]
                                [--verbose]
                                input
 
-Tool to sort finite automata using partition refinement algorithm.
+Tool to sort and prune finite automata using partition refinement algorithm.
 
 positional arguments:
   input            input automaton file name
 
 optional arguments:
   -h, --help       show this help message and exit
-  -o O             output files basename (def. filename.part)
-  --pruning        run the pruning algorithm (def. False)
-  --suprema        Only for --pruning, compute suprema strings pruned DFA (def. False)
-  --ascii          use the ascii alphabet (def. False)
+  -o O             output file basename (def. filename.part)
+  --pruning        compute pruned automaton recognizing infimum strings (def. False)
+  --ascii          use ascii alphabet to encode edge labels rather than DNA alphabet (def. False)
   --source SOURCE  Only for .dot inputs, define the source state (def. 0)
-  --idbase1        activate if state ids start from 1 (def. False)
+  --idbase1        activate if state ids start from 1 rather than from 0 (def. False)
   --intermediate   take in input an intermediate file (def. False)
   --verbose        verbose mode on (def. False)
 ```
@@ -91,12 +90,31 @@ python3 partition_refinement.py --idbase1 --source 0 --verbose data/randWG.dot
 python3 partition_refinement.py --ascii --intermediate --verbose data/randWG.inter
 // Run pruning algorithm on a random DFA
 python3 partition_refinement.py  --ascii --intermediate --pruning --verbose data/DFA.inter
-python3 partition_refinement.py  --ascii --intermediate --pruning --suprema --verbose data/DFA.inter
 ```
 
-# External resources
+### External resources
 
 * [malloc_count](https://github.com/bingmann/malloc_count)
+
+### Citation 
+
+Please, if you use this tool in an academic setting, cite the following paper:
+
+    @article{BeckerCCKKOP23,
+      author    = {Ruben Becker and
+                   Manuel C{\'{a}}ceres and
+                   Davide Cenzato and
+                   Sung{-}Hwan Kim and
+                   Bojana Kodric and
+                   Francisco Olivares and
+                   Nicola Prezza},
+      title     = {Sorting Finite Automata via Partition Refinement},
+      journal   = {CoRR},
+      volume    = {abs/2305.05129},
+      pages     = {129--142},
+      year      = {2023},
+      doi       = {10.48550/arXiv.2305.05129}
+    }
 
 ### Funding
 
