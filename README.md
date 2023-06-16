@@ -111,7 +111,6 @@ Please, if you use this tool in an academic setting, cite the following paper:
       title     = {Sorting Finite Automata via Partition Refinement},
       journal   = {CoRR},
       volume    = {abs/2305.05129},
-      pages     = {129--142},
       year      = {2023},
       doi       = {10.48550/arXiv.2305.05129}
     }
