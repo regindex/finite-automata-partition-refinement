@@ -33,7 +33,7 @@ make
 
 ### Input
 
-The tool takes in input an automaton either in .dot format, the initial state must the one with the smallest id (see below for an example),
+This tool takes in input an automaton in .dot format; the source state must the one with the smallest id (see below for an example),
 ```
 strict digraph {
   S1 -> S2 [ label = 0 ];
@@ -48,7 +48,7 @@ strict digraph {
   ...
 }
 ```
-or using an intermediate format, one edge per line plus the last line containing numbers of states, number of edgesm source abd number of accepting states  (see below for an example).
+The tool can also take in input an intermediate format, it consists of one edge per line plus the last line containing numbers of states, number of edges, source state, and number of accepting states (see below for an example).
 ```
 2 3 $
 3 5 A
