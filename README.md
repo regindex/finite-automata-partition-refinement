@@ -100,19 +100,21 @@ python3 partition_refinement.py  --ascii --intermediate --pruning --verbose data
 
 Please, if you use this tool in an academic setting, cite the following paper:
 
-    @article{BeckerCCKKOP23,
-      author    = {Ruben Becker and
-                   Manuel C{\'{a}}ceres and
-                   Davide Cenzato and
-                   Sung{-}Hwan Kim and
-                   Bojana Kodric and
-                   Francisco Olivares and
-                   Nicola Prezza},
-      title     = {Sorting Finite Automata via Partition Refinement},
-      journal   = {CoRR},
-      volume    = {abs/2305.05129},
-      year      = {2023},
-      doi       = {10.48550/arXiv.2305.05129}
+    @inproceedings{BeckerCCKKOP23,
+      author       = {Ruben Becker and
+                      Manuel C{\'{a}}ceres and
+                      Davide Cenzato and
+                      Sung{-}Hwan Kim and
+                      Bojana Kodric and
+                      Francisco Olivares and
+                      Nicola Prezza},
+      title        = {Sorting Finite Automata via Partition Refinement},
+      booktitle    = {In Proceedings of the 31st Annual European Symposium on Algorithms, {ESA} 2023},
+      series       = {LIPIcs},
+      volume       = {274},
+      pages        = {15:1--15:15},
+      year         = {2023},
+      doi          = {10.4230/LIPICS.ESA.2023.15}
     }
 
 ### Funding

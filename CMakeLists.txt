@@ -44,31 +44,31 @@ endif()
 # Targets
 include_directories(${PROJECT_SOURCE_DIR})
 
-add_executable(part-ref32.x main.cpp lib/part_ref.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
+add_executable(part-ref32.x main.cpp lib/part_ref.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp)
 target_link_libraries(part-ref32.x dl)
 
-add_executable(part-ref32-verb.x main.cpp lib/part_ref.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
+add_executable(part-ref32-verb.x main.cpp lib/part_ref.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp)
 target_link_libraries(part-ref32-verb.x dl)
 target_compile_options(part-ref32-verb.x PUBLIC "-DVERBOSE")
 
-add_executable(part-ref64.x main.cpp lib/part_ref.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
+add_executable(part-ref64.x main.cpp lib/part_ref.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp)
 target_link_libraries(part-ref64.x dl)
 target_compile_options(part-ref64.x PUBLIC "-DM64")
 
-add_executable(part-ref64-verb.x main.cpp lib/part_ref.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
+add_executable(part-ref64-verb.x main.cpp lib/part_ref.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp)
 target_link_libraries(part-ref64-verb.x dl)
 target_compile_options(part-ref64-verb.x PUBLIC "-DM64" "-DVERBOSE")
 
-# add_executable(check32.x check_output.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
+# add_executable(check32.x check_output.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp)
 # target_link_libraries(check32.x dl)
 
-# add_executable(check32-verb.x check_output.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
+# add_executable(check32-verb.x check_output.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp)
 # target_link_libraries(check32-verb.x dl)
 # target_compile_options(check32-verb.x PUBLIC "-DVERBOSE")
 
-add_executable(merge32.x merge.cpp lib/part_ref.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
+add_executable(merge32.x merge.cpp lib/part_ref.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp)
 target_link_libraries(merge32.x dl)
 
-add_executable(merge32-verb.x merge.cpp lib/part_ref.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp external/malloc_count/malloc_count.c)
+add_executable(merge32-verb.x merge.cpp lib/part_ref.cpp internal/Automaton.hpp internal/partition.hpp internal/definitions.hpp)
 target_link_libraries(merge32-verb.x dl)
 target_compile_options(merge32-verb.x PUBLIC "-DVERBOSE")
