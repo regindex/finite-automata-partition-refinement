@@ -101,7 +101,7 @@ int main(int argc, char** argv)
     else{        P = partition(sigma,source); }
     // add second source
     P.add_source(source+n);
-    P.print_partition();
+    
     #ifdef VERBOSE
     {
       std::cout << "initialize automaton...\n";
@@ -129,10 +129,18 @@ int main(int argc, char** argv)
   }
   else{ std::cerr << "invalid no. arguments\n"; exit(1); }
 
-  std::cout << "Start sorting infima and suprema automata\n";
+  #ifdef VERBOSE
+  {
+    std::cout << "Start sorting infima and suprema automata\n";
+  }
+  #endif
   partition_refinement_NFA(P, Aut);
 
-  std::cout << "Store state intervals to file\n";
+  #ifdef VERBOSE
+  {
+    std::cout << "Store state intervals to file\n";
+  }
+  #endif
   Aut.store_state_intervals(out_file, P, n);
 
   return 0;

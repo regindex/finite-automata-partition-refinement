@@ -163,7 +163,6 @@ int main(int argc, char** argv)
   // run partition refinement algorithm
   if( pruning )
   {
-      std::cout << "Start sorting automaton using Pruning algorithm\n";
       partition_refinement_DFA(P, Aut);
 
       // print the output
