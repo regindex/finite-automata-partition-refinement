@@ -3,9 +3,7 @@
 
 #include "partition.hpp"
 
-/*
-	node of the NFA
-*/
+/* node of the NFA */
 struct node
 {
 	// out edges
@@ -72,6 +70,21 @@ public:
 		return &NFA[i];
 	}
 
+	void set_source(uint_t source_)
+	{
+		this->source = source_;
+	}
+
+	uint_t give_source()
+	{
+		return this->source;
+	}
+
+	std::vector<char>* give_labels()
+	{
+		return &this->labels;
+	}
+
 	void add_edge(uint_t origin, uint_t dest, int label, partition& P){
 
 		// insert out edge
@@ -88,35 +101,284 @@ public:
 		edges++;
 	}
 
+	void add_dummy_state(partition& P){
+
+		// add dummy node in the partition
+		P.add_node(nodes, 126);
+		// add dummy node in the automaton
+		NFA.push_back(node());
+		// create new count value
+		counts.push_back(nullptr);
+		counts[nodes] = new uint_t;
+		*counts[nodes] = 1;
+		// make the dummy state the new source state
+		NFA[nodes].out = NFA[source].out;
+		NFA[nodes].count = NFA[source].count;
+		NFA[nodes].out_part = P.give_part(126);
+		// connect the old source to the new one
+		NFA[source].out = std::vector<uint_t>{nodes};
+		NFA[source].count = std::vector<uint_t*>{counts[nodes]}; 
+	}
+
+	void add_label(uint_t dest, char label){
+
+		if(labels.size() == 0)
+			labels = std::vector<char>(nodes,0);
+
+		labels[dest] = label;
+	}
+
 	void delete_counts()
 	{
 		counts.resize(0);
 		counts.shrink_to_fit();
 	}
 
-	/*
-		function to print P to dot file
-	*/
-	void to_dot(std::string out)
+	/*  */
+	uint_t map_state_to_part(partition& P, bool pruned = false)
 	{
+		// get head of the partition
+		part* curr = P.give_head();
+		// set node counter
+		uint_t cnt = 0;
+		// iterate over all parts
+		while(curr != nullptr)
+		{	
+			// interate over nodes in each part
+			for (const auto& e: *curr->nodes)
+			{
+				if( pruned ){ remove_deleted_edges(e); }
+				// add one count if the node has no edges
+				if( NFA[e].count.size() == 0 ){ NFA[e].count.resize(1); }
+				NFA[e].count[0] = new uint_t(cnt);
+			}
+			// increase counter
+			cnt++;
+			// stop when reaching the last state
+			curr = curr->next;
+		}
+
+		return cnt;
+	}
+
+	/*
+		function to print the resulting pruned automaton to file
+	*/
+	void to_output_pruned(std::string out)
+	{
+		// fix automaton if we added the dummy state
+		if( nodes < NFA.size() )
+			NFA[source] = NFA[nodes];
+
+		// open output file 
 		std::ofstream ofile;
 		ofile.open(out); 
-		ofile << "strict digraph  {" << std::endl;
-		//ofile_DOT << "\t" << to_string(edge.get_tail_label()) << " -> " << to_string(edge.get_head_label()) << " [label=" << this->get_decoded_label(edge.get_label()) << "];" << endl;
-		for(uint_t i=0;i<NFA.size();++i)
+		// scan the graph
+		for(uint_t i=0;i<nodes;++i)
 		{
 			for(uint_t j=0;j<NFA[i].out.size();++j)
 			{
 				if( *NFA[i].count[j] > 0 )
 				{
-					//ofile << "\t" << "S" << i << " -> " << "S" << NFA[i].out[j] << " [label=" << "];" << std::endl;
-					ofile << "\t" << "S" << i << " -> " << "S" << NFA[i].out[j] << std::endl;
+					ofile << i << " " << labels[NFA[i].out[j]] << " " << NFA[i].out[j] << "\n";
 				}
 			}
 		}
-		ofile << "}";
 		// close output file
 		ofile.close();
+	}
+
+	void to_output_Wheeler(std::string out, partition& P, bool compact = true)
+	{
+		// initialize and open output files
+		std::ofstream ofile, L, In, Out;
+		// initialize needed variables
+		uint_t out_d = 0, n = 0, m = 0;
+		std::vector<uint_t> in_d, in_l; 
+		// mapping state to part
+		std::vector<uint_t> mapping;
+		// vector storing 
+		if( compact )
+		{
+			L.open(out+".L"); In.open(out+".in"); Out.open(out+".out"); 
+		}
+		else
+			ofile.open(out); 
+		// compute mapping state -> part
+		n = map_state_to_part(P);
+		// init indegree vector or write no. states to file
+		if( compact )
+		{
+			in_d = std::vector<uint_t>(n,0);
+			in_l = std::vector<uint_t>(sigma_ascii,0);
+		}
+		else
+			ofile << n << "\n";
+		// set current part to head of partition
+		part* curr = P.give_head();
+		// iterate over partition and output automaton
+		while(curr != nullptr)
+		{	
+			// set containing reached states
+			std::unordered_set<uint_t> dest_map;
+			// set outdegree to zero
+			out_d = 0;
+			// iterate over nodes in part
+			for (const auto& e: *curr->nodes)
+			{
+				// beginning state
+				uint_t b = *(NFA[e].count)[0];
+				// iterate over outgoing edges
+				for(uint_t i=0;i<NFA[e].out.size();++i)
+				{
+					// compute reached state and label
+					uint_t o = NFA[e].out[i];				
+					uint_t op = *(NFA[o].count)[0];
+					// check if destination has already been reached
+					if(dest_map.find(op) == dest_map.end())
+					{
+						// increase in and out degree counter or write edge
+						if( compact )
+							{
+								out_d++; in_d[op]++; in_l[labels[o]]++;
+								L << labels[o]; 
+							}
+						else
+							ofile << b << " " << labels[o] << " " << op << "\n";
+						// increase edges count
+						m++;
+						// update set
+						dest_map.insert(op);
+					}
+				}
+			}
+			// write out degree if needed
+			if( compact )
+				Out << out_d << "\n";
+			// stop when reaching the last state
+			curr = curr->next;
+		}
+		// close output files
+		if( compact )
+		{
+			// write in degrees
+			for(uint_t i=0;i<n;++i)
+				In << in_d[i] << "\n";
+			// close streams
+			L.close(); In.close(); Out.close(); 
+		}
+		else
+			ofile.close(); 
+	}
+
+	void remove_deleted_edges(uint_t e)
+	{
+		// remove an edge if its count is equal to zero
+		for(uint_t i=0;i<NFA[e].out.size();++i)
+		{
+			if(*NFA[e].count[i] == 0){ NFA[e].out[i] = U_MAX; }
+		}
+	}
+
+	/*
+		function to print the resulting pruned automaton to file
+	*/
+	void to_output_pruned_Wheeler(std::string out, partition& P, bool suprema, bool compact = true)
+	{
+		// initialize and open output files
+		std::ofstream ofile, L, In, Out;
+		// initialize needed variables
+		uint_t out_d = 0, n = 0, m = 0;
+		std::vector<uint_t> in_d;
+		// mapping state to part
+		std::vector<uint_t> mapping;
+		mapping.resize(nodes);
+		// vector storing 
+		if( compact )
+		{
+			L.open(out+".L"); In.open(out+".in"); Out.open(out+".out"); 
+		}
+		else
+			ofile.open(out); 
+		// compute mapping state -> part
+		n = map_state_to_part(P,true);
+		if( suprema ){ n--; }
+		// init indegree vector or write no. states to file
+		if( compact ){ in_d = std::vector<uint_t>(n,0); }
+		else
+			ofile << n << "\n";
+		// set current part to head of partition
+		part* curr = P.give_head();
+		if( suprema )
+		{
+			curr->next->prev = nullptr;
+			/* curr = curr->next; */
+			curr = NFA[nodes].out_part;
+		}
+		// iterate over partition and output automaton
+		while(curr != nullptr)
+		{	
+			// set containing reached states
+			std::unordered_set<uint_t> dest_map;
+			// set outdegree to zero
+			out_d = 0;
+			// iterate over nodes in part
+			for (const auto& e: *curr->nodes)
+			{
+				//std::cout << e << std::endl;
+				// beginning state
+				uint_t b = *(NFA[e].count)[0];
+				// iterate over outgoing edges
+				for(uint_t i=0;i<NFA[e].out.size();++i)
+				{
+					// compute reached state and label
+					uint_t o = NFA[e].out[i];
+					// proceed in case of a non deleted edge
+					if( o != U_MAX )
+					{
+						uint_t op = *(NFA[o].count)[0];
+						// check if destination has already been reached
+						if(dest_map.find(op) == dest_map.end())
+						{
+							// increase in and out degree counter or write edge
+							if( compact )
+								{
+									out_d++; in_d[op]++;
+									L << labels[o]; 
+								}
+							else
+							{
+								if(suprema){ ofile << n-b << " " << labels[o] << " " << n-op << "\n"; }
+								else{ ofile << b << " " << labels[o] << " " << op << "\n"; }
+							}
+							// increase edges count
+							m++;
+							// update set
+							dest_map.insert(op);
+						}
+					}
+				}
+			}
+			// write out degree if needed
+			if( compact )
+				Out << out_d << "\n";
+			// stop when reaching the last state
+			if( suprema )
+				curr = curr->prev;
+			else
+				curr = curr->next;
+		}
+		// close output files
+		if( compact )
+		{
+			// write in degrees
+			for(uint_t i=0;i<n;++i)
+				In << in_d[i] << "\n";
+			// close output streams
+			L.close(); In.close(); Out.close(); 
+		}
+		else
+			ofile.close(); 
 	}
 
 	/*
@@ -156,37 +418,17 @@ public:
 		ofile.close();
 	}
 
-	/*
-		function to print P to dot file
-	*/
-	template<typename T>
-	void to_intermediate(std::string out, std::vector<T>& labels)
-	{
-		std::ofstream ofile;
-		ofile.open(out); 
-		// scan the graph
-		for(uint_t i=0;i<NFA.size();++i)
-		{
-			for(uint_t j=0;j<NFA[i].out.size();++j)
-			{
-				if( *NFA[i].count[j] > 0 )
-				{
-					//ofile << i << " " << NFA[i].out[j] << " " << labels[NFA[i].out[j]] << "\n";
-					ofile << i << " " << labels[NFA[i].out[j]] << " " << NFA[i].out[j] << "\n";
-				}
-			}
-		}
-		// close output file
-		ofile.close();
-	}
-
 private:
 	// number of nodes in the DFA
 	uint_t nodes;
 	// number of edges in the DFA
 	uint_t edges;
+	// source node
+	uint_t source;
 	// vector containing all edges
 	std::vector<node> NFA;
+	// vector containing all labels
+	std::vector<char> labels;
 	// tmp count vector
 	std::vector<uint_t*> counts;
 };

@@ -5,12 +5,12 @@
 #include "part_ref.h"
 
 /**
- * @brief Sort a Wheeler NFA using the partition refinement algorithm
+ * @brief Sort a (Pseudo-)Wheeler automaton using the partition refinement algorithm
  * 
  * @param P   input partition
- * @param NFA input consistent NFA to sort
+ * @param NFA a (Pseudo-)Wheeler automato to sort
  */
-void PART_REF_NFA(partition& P, graph& NFA) {
+void PART_REF_WHEELER(partition& P, graph& NFA) {
 
 	// iterate until C is empty
 	while(true)
@@ -329,12 +329,12 @@ void PART_REF_NFA(partition& P, graph& NFA) {
 }
 
 /**
- * @brief Sort an input consistent DFA using the partition refinement algorithm
+ * @brief Prune an input consistent automaton using the partition refinement algorithm
  * 
  * @param P   input partition
- * @param DFA input consistent DFA to sort
+ * @param DFA input consistent automaton to sort
  */
-void PART_REF_DFA(partition& P, graph& DFA) {
+void PART_REF_PRUNE(partition& P, graph& DFA) {
 
 	#ifdef VERBOSE
 	{
@@ -347,6 +347,9 @@ void PART_REF_DFA(partition& P, graph& DFA) {
 	// iterate until C is empty
 	while(true)
   	{
+  		//std::cout << "i:" << i; 
+  		//i++;
+  		//std::cout << "print new B\n";
   		// get splitter B and S_w_B
 	    std::pair<bool,std::pair<part*,part*>*> S = P.get_B();
 	    std::pair<part*,part*>* B = new std::pair<part*,part*>;
@@ -553,6 +556,7 @@ void PART_REF_DFA(partition& P, graph& DFA) {
 		}
 	    #endif
 		
+		// exit(1);
 	    // update the partition
 	    for (auto entry : D1)
 	    {
@@ -560,6 +564,7 @@ void PART_REF_DFA(partition& P, graph& DFA) {
 	      	part* part_D12 = nullptr;
 	     	if( entry.second.second->size() > 0 )
 	      	{
+	      		//std::cout << "ENTRATO\n";
 	        	part_D12 = new part();
 	        	part_D12->nodes = entry.second.second;
 	        	for (auto const &i: *part_D12->nodes)
@@ -584,9 +589,12 @@ void PART_REF_DFA(partition& P, graph& DFA) {
 	      	int no_new_parts = 1;
 	      	if( S.first ) // D12 D11 D2
 	      	{
+	      		//std::cout << "un first\n";
 	      		// create new D12 part
 	        	if(part_D12 != nullptr)
 	        	{
+	        		////std::cout << "prev: " << entry.first->prev << "\n";
+	        		////std::cout << "B: " << B->first << "\n";
 	          		P.insert(entry.first->prev,part_D12);
 	          		first = part_D12;
 	          		no_new_parts++;
@@ -667,10 +675,10 @@ void PART_REF_DFA(partition& P, graph& DFA) {
 	        			// if true entry.first was not compound before this split
 	        			P.insert_C( P.update_return_last(entry.first,last) );
 	        		} // else if it was already a compound
-	        		else{ P.update_last(entry.first,last); }
+	        		else{ P.update_last(entry.first,last); /*std::cout << "2.1 ";*/}
 	        	}
 	        	// if we removed D2 update the pointer to last element of compound
-	        	if( D2_rem && is_first ){ P.update_first(entry.first,first); }
+	        	if( D2_rem && is_first ){ P.update_first(entry.first,first); /*std::cout << "3 ";*/ }
 	   	 	}
 	    }
 
@@ -716,29 +724,28 @@ void PART_REF_DFA(partition& P, graph& DFA) {
  	}
 }
 
-
 /**
- * @brief Sort a Wheeler NFA using the partition refinement algorithm
+ * @brief Sort a (Pseudo-)Wheeler automaton using the partition refinement algorithm
  * 
  * @param P   input partition
- * @param NFA input consistent NFA to sort
+ * @param NFA a (Pseudo-)Wheeler automato to sort
  */
-void partition_refinement_NFA(partition& P, graph& NFA){
+void partition_refinement_Wheeler_automaton(partition& P, graph& NFA){
 	// input check before algorithm execution
 	if((NFA.no_nodes() == 0) || (P.give_head()->next == nullptr)) {std::cerr << "Empty input found." << std::endl; exit(-1);}
 	// execute sorting algorithm
-	PART_REF_NFA(P, NFA);
+	PART_REF_WHEELER(P, NFA);
 }
 
 /**
- * @brief Sort an input consistent DFA using the partition refinement algorithm
+ * @brief Prune an input consistent automaton using the partition refinement algorithm
  * 
  * @param P   input partition
- * @param DFA input consistent DFA to sort
+ * @param DFA input consistent automaton to sort
  */
-void partition_refinement_DFA(partition& P, graph& DFA){
+void partition_refinement_pruning(partition& P, graph& DFA){
 	// input check before algorithm execution
 	if((DFA.no_nodes() == 0) || (P.give_head()->next == nullptr)) {std::cerr << "Empty input found." << std::endl; exit(-1);}
 	// execute sorting algorithm
-	PART_REF_DFA(P, DFA);
+	PART_REF_PRUNE(P, DFA);
 }

@@ -3,8 +3,8 @@
 
 #include "definitions.hpp"
 
-/*
-	node representing a part in the partition
+/* 
+	node representing a part in the partition 
 */
 struct part
 {
@@ -16,7 +16,7 @@ struct part
     std::unordered_set<uint_t>* nodes;
 };
 
-/*
+/* 
 	node of the compound block list C
 */
 struct node_compound
@@ -41,7 +41,7 @@ public:
 		// initialize head
 		head = new part();
 		head->nodes = new std::unordered_set<uint_t>;
-		////head->nodes->insert(0);
+		// insert source
 		head->nodes->insert(source);
 		head->prev = nullptr;
 		spoint[0] = head;
@@ -54,12 +54,11 @@ public:
 			prev->next = node;
 			spoint[i] = node;
 			node->prev = prev;
-			//node->last=false;
+			// update previous node
 			prev = node;
 		}
 		// set last node pointer
 		prev->next = nullptr;
-		//prev->last = true; 
 		// iterate over edge list
 	  	for(uint_t i=0;i<edge_list.size();++i)
 	  	{
@@ -77,7 +76,7 @@ public:
 		// initialize head
 		head = new part();
 		head->nodes = new std::unordered_set<uint_t>;
-		////head->nodes->insert(0);
+		// insert source
 		head->nodes->insert(source);
 		head->prev = nullptr;
 		spoint[0] = head;
@@ -168,7 +167,7 @@ public:
 				found = true; break;
 			}
 		}
-
+		// handle case where no splitter is found
 		if( !found )
 		{
 			S = new std::pair<part*,part*>;
@@ -176,7 +175,7 @@ public:
 		}
 
 		uint_t size_first, size_last;
-		// problema su 172
+		// check splitter sizes
 		size_first = S->first->nodes->size();
 		size_last = S->second->nodes->size();
 

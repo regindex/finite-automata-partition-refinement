@@ -1,31 +1,26 @@
 #ifndef PART_REF_H
 #define PART_REF_H
 
-#include <iostream>
-#include <ctime>
-#include <chrono>
-#include <vector>
-#include <cassert>
-
-#include "../internal/Automaton.hpp"
+#include "internal/definitions.hpp"
+#include "internal/automaton.hpp"
 
 typedef NFA_unidirectional_out_unlabelled graph; 
 
 /**
- * @brief Sort a Wheeler NFA using the partition refinement algorithm
+ * @brief Sort a (Pseudo-)Wheeler automaton using the partition refinement algorithm
  * 
  * @param P   input partition
- * @param NFA input consistent NFA to sort
+ * @param NFA a (Pseudo-)Wheeler automaton to sort
  */
-void partition_refinement_NFA(partition& P, graph& NFA);
+void partition_refinement_Wheeler_automaton(partition& P, graph& NFA);
 
 /**
- * @brief Prune an input consistent DFA using the partition refinement algorithm
+ * @brief Prune an input consistent automaton using the partition refinement algorithm
  * 
  * @param P   input partition
- * @param DFA input consistent DFA to sort
+ * @param DFA input consistent automaton to sort
  */
-void partition_refinement_DFA(partition& P, graph& DFA);
+void partition_refinement_pruning(partition& P, graph& DFA);
 
 
 #endif /* PART_REF_H */
