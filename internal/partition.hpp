@@ -62,7 +62,7 @@ public:
 		// iterate over edge list
 	  	for(uint_t i=0;i<edge_list.size();++i)
 	  	{
-	    	int label =  seq_nt6_table[std::get<2>(edge_list[i])];
+	    	int label = std::get<2>(edge_list[i]);
 	    	spoint[label]->nodes->insert(std::get<1>(edge_list[i]));
 	  	}
 	  	// compute first S in C and remove empty partitions

@@ -1,54 +1,28 @@
 // include partition refinement algorithm
 #include "lib/part_ref.h"
 #include "internal/utils.hpp"
-
-void prune_automaton(std::string in_file, std::string out_file,
-                     uint_t n, uint_t source, bool dot_format,
-                     bool base_ind, bool suprema)
-{
-    // initialize the initial partition
-    partition P = partition(sigma_ascii,source);
-    // initialize the automaton
-    graph Aut = graph(n);
-    Aut.set_source(source);
-    // parse input file
-    parse_input_file(in_file,P,Aut,dot_format,base_ind,suprema,suprema); 
-    // delete auxiliary data structures
-    Aut.delete_counts();
-    P.delete_spoint();
-    // search first compound block
-    P.set_first_C_block();
-    // run partition refinement algorithm
-    partition_refinement_pruning(P, Aut);
-    // write automaton to file
-    Aut.to_output_pruned(out_file);
-}
    
 int main(int argc, char** argv)
 {
   // read command line arguments
   partition P;
   graph Aut;
-  std::string out_file, in_file;
+  std::string out_file, infima_file, 
+                       suprema_file;
   uint_t n, source;
-  bool dot_format, base_ind;
+  bool dot_format, base_ind, print_inter,
+       compact;
   // read input from file
-  if(argc == 7)
+  if(argc == 8)
   { 
     // set input parameters
-    in_file = std::string(argv[1]);
-    out_file = std::string(argv[2]);
-    n = std::stoull(argv[3]);
-    source = std::stoull(argv[4]);
-    dot_format = atoi(argv[5]);
-    base_ind = atoi(argv[6]);
-
-    // prune infima automaton
-    prune_automaton(in_file,in_file+".infima",n,source,
-                    dot_format,base_ind,false);
-    // prune suprema automaton
-    prune_automaton(in_file,in_file+".suprema",n,source,
-                    dot_format,base_ind,true);
+    infima_file = std::string(argv[1]);
+    suprema_file = std::string(argv[2]);
+    out_file = std::string(argv[3]);
+    n = std::stoull(argv[4]);
+    source = std::stoull(argv[5]);
+    print_inter = atoi(argv[6]);
+    compact = atoi(argv[7]);
 
     /* Merge and sort infima and suprema automata */
     // initialize the initial partition
@@ -58,7 +32,7 @@ int main(int argc, char** argv)
     // initialize the automaton
     Aut = graph(n*2);
     // parse input files
-    parse_input_merge(in_file+".infima",in_file+".suprema",n,P,Aut); 
+    parse_input_merge(infima_file,suprema_file,n,P,Aut); 
     // delete auxiliary data structures
     Aut.delete_counts();
     P.delete_spoint();
@@ -70,7 +44,14 @@ int main(int argc, char** argv)
   /* sort Aut automaton using the partition refinement algorithm */
   partition_refinement_Wheeler_automaton(P, Aut);
   /* write output files */
-  Aut.store_state_intervals(out_file, P, n);
+  if( print_inter )
+    Aut.store_state_intervals(out_file, P, n);
+  else
+  {
+    //Aut.to_output_infsup_Wheeler(out_file + ".dot", P, compact);
+    Aut.to_output_Wheeler(out_file, P, compact);
+    P.to_file(out_file+".mapping");
+  }
 
   return 0;
 }

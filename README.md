@@ -2,7 +2,7 @@
 
 ### Description
 
-<strong> finite-automata-partition-refinement </strong> is a tool implementing the partition refinement algorithm, and offers three main functionalities: 1) Sorting (Pseudo)-Wheeler NFAs, 2) Pruning an input automaton in to two automata recognizing infima and suprema strings, 3) Compute the co-lexicographic intervals of the automaton states. 
+<strong> finite-automata-partition-refinement </strong> is a tool implementing the partition refinement algorithm, and offers three main functionalities: 1) Sorting (Pseudo)-Wheeler automata, 2) Pruning an (input-consistent) automaton in to two automata recognizing infima and suprema strings, 3) Compute the co-lexicographic intervals of an (input-consistent) automaton states. 
 
 ### Requirements
 
@@ -33,63 +33,72 @@ make
 
 ### Input
 
-This tool can take in input an automaton in .dot format; the source state must have the smallest id (see below for an example),
+This tool can take in input an input-consistent automaton in .dot format; the source state must have the smallest id (see below for an example),
 ```
 strict digraph {
-  S1 -> S2 [ label = 65 ];
-  S3 -> S2 [ label = 65 ];
-  S6 -> S2 [ label = 65 ];
-  S10 -> S2 [ label = 65 ];
-  S12 -> S2 [ label = 65 ];
-  S13 -> S2 [ label = 65 ];
-  S14 -> S3 [ label = 65 ];
-  S16 -> S4 [ label = 65 ];
-  S3 -> S5 [ label = 67 ];
-  ...
+  S1 -> S2 [ label = 84 ];
+  S2 -> S3 [ label = 65 ];
+  S3 -> S4 [ label = 84 ];
+  S4 -> S5 [ label = 65 ];
+  S5 -> S2 [ label = 84 ];
+  S5 -> S6 [ label = 67 ];
+  S6 -> S6 [ label = 67 ];
+  S6 -> S7 [ label = 65 ];
+  S7 -> S8 [ label = 67 ];
+  S8 -> S9 [ label = 84 ];
+  S9 -> S7 [ label = 65 ];
+  S9 -> S4 [ label = 84 ];
 }
 ```
 The tool can also accept an intermediate format: it consists of one edge per line (origin edge-label destination) plus the first line containing numbers of states, number of edges, source state, and number of accepting states (see below for an example).
 ```
-6 5 2 1
-2 3 $
-3 5 A
-5 0 A
-5 4 C
-0 1 A
+9 12 0 1
+0 T 1
+1 A 2
+2 T 3
+3 A 4
+4 T 1
+4 C 5
+5 C 5
+5 A 6
+6 C 7
+7 T 8
+8 A 6
+8 T 3
+8
 ```
 
 ### Usage
 
 ```
-usage: partition_refinement.py [-h] [-outpath OUTPATH] [--sort] [--prune] [--intervals] [--compact] [--dot] [--source SOURCE] [--idbase1] [--verbose] input
+usage: partition_refinement.py [-h] [-outpath OUTPATH] [--sort] [--prune] [--intervals] [--compact] [--intermediate] [--keep] [--verbose] input
 
 Tool to sort and prune finite automata using the partition refinement algorithm.
 
 positional arguments:
   input             automaton file path
 
-optional arguments:
+options:
   -h, --help        show this help message and exit
   -outpath OUTPATH  output file basename (def. filename.part)
   --sort            sort a (Pseudo-)Wheeler automaton using the partition refinement algorithm (def. False)
-  --prune           compute pruned automata recognizing infima and suprema strings (def. False)
+  --prune           compute pruned (infsup-automaton) automaton recognizing infima and suprema strings (def. False)
   --intervals       compute the colex. intervals of the input automaton (def. False)
   --compact         write the output automata in compact format (def. False)
-  --dot             take in input a dot file (def. False)
-  --source SOURCE   Only for .dot inputs, define the source state of the input automaton (def. 0)
-  --idbase1         activate if state ids start from 1 rather than from 0 (def. False)
+  --intermediate    take in input an intermediate file instead of a .dot file (def. False)
+  --keep            keep intermediate files (def. False)
   --verbose         verbose mode on (def. False)
 ```
-Note that all input automata are supposed to be input consistent, i.e., it does not exist a node reached by two edges labelled with two different characters.
+Note that all input automata are supposed to be input consistent, i.e., it must hold that each automaton state is reached by edges labeled with the same character.
 
 ### Run on example data
 
 ```console
 // Take in input a (Pseudo)-Wheeler automata and run algorithm (1)
-python3 partition_refinement.py --dot --idbase1 --sort data/randWG.dot
-// Take in input a finite automata (it must be input consistent) and run algorithm (2) and (3)
-python3 partition_refinement.py --prune --compact data/randWG.inter
-python3 partition_refinement.py --intervals data/randWG.inter
+python3 partition_refinement.py --sort data/randWG.dot
+// Take in input a finite automata (input consistent) and run algorithm (2) and (3)
+python3 partition_refinement.py --prune --compact --intermediate data/randWG.inter
+python3 partition_refinement.py --intervals --intermediate data/randWG.inter
 ```
 
 ### References and Citations 

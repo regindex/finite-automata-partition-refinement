@@ -29,6 +29,8 @@ void parse_input_file(std::string input_file, partition& P, graph& Aut, bool dot
     uint_t origin, dest;
     int label;
     std::vector<std::string> out; 
+    // init labels vector
+    Aut.init_label_vector();
 
     while(std::getline(input, line))
     {
@@ -40,25 +42,25 @@ void parse_input_file(std::string input_file, partition& P, graph& Aut, bool dot
         // skip lines not encoding an edge in the dot file
         if(out.size() < 8){ continue; }
         // read an edge in the dot file
-        origin = stoull(out[0].substr(2, out[0].size())) - base_ind;
-        dest = stoull(out[2].substr(1, out[2].size())) - base_ind;
-        label = stoi(out[6]);
+        origin = stoull(out[0].substr(2, out[0].size())) - base_ind; //- base_ind;
+        dest = stoull(out[2].substr(1, out[2].size())) - base_ind;   //- base_ind;
+        label = stoi(out[6]) + 1;
       }
       else
       {
         // skip lines not encoding an edge
         if(out.size() != 3){ continue; }
         // read an edge
-        origin = stoull(out[0]) - base_ind;
-        dest = stoull(out[2]) - base_ind;
-        label = (int)out[1][0];
+        origin = stoull(out[0]) - base_ind; // - base_ind;
+        dest = stoull(out[2]) - base_ind;   // - base_ind;
+        label = (int)out[1][0] + 1;
       }
 
       // if we are running the pruning algorithm store the labels
       //if( pruning )
       Aut.add_label(dest, label);
       // if we are pruning the suprema strings automaton
-      if( invert ){ label = 127 - label; }
+      if( invert ){ label = sigma_ascii - label - 1; }
 
       // add new node and edge
       P.add_node(dest, label);
@@ -73,8 +75,8 @@ void parse_input_file(std::string input_file, partition& P, graph& Aut, bool dot
 
 
 /* simple parser for intermediate file; it reads line by line origin \t destination \t label \n */
-void parse_input_merge(std::string input_infima, std::string input_suprema, 
-                       uint_t n, partition& P, graph& Aut)
+void parse_input_merge(std::string input_infima, std::string input_suprema, uint_t n,
+                       partition& P, graph& Aut)
 {
     // open stream to input
     std::ifstream infima(input_infima);
@@ -84,6 +86,8 @@ void parse_input_merge(std::string input_infima, std::string input_suprema,
     uint_t origin, dest;
     int label;
     std::vector<std::string> out; 
+    // init labels vector
+    Aut.init_label_vector();
 
     // parse infima automaton
     while(std::getline(infima, line))
@@ -91,12 +95,12 @@ void parse_input_merge(std::string input_infima, std::string input_suprema,
       std::vector<std::string> out; 
       tokenize(line, delim, out); 
 
-      // skip lines not encoding an edge
-      if(out.size() != 3){ continue; }
-      // read an edge
-      origin = stoull(out[0]);
-      dest = stoull(out[2]);
-      label = (int)out[1][0];
+      // skip lines not encoding an edge in the dot file
+      if(out.size() < 8){ continue; }
+      // read an edge in the dot file
+      origin = stoull(out[0].substr(2, out[0].size())) - 1; // - 1;
+      dest = stoull(out[2].substr(1, out[2].size())) - 1;   // - 1;
+      label = stoi(out[6]) + 1;
 
       // if we are running the pruning algorithm store the labels
       Aut.add_label(dest, label);
@@ -111,12 +115,12 @@ void parse_input_merge(std::string input_infima, std::string input_suprema,
       std::vector<std::string> out; 
       tokenize(line, delim, out); 
 
-      // skip lines not encoding an edge
-      if(out.size() != 3){ continue; }
-      // read an edge
-      origin = stoull(out[0]) + n;
-      dest = stoull(out[2]) + n;
-      label = (int)out[1][0];
+      // skip lines not encoding an edge in the dot file
+      if(out.size() < 8){ continue; }
+      // read an edge in the dot file
+      origin = stoull(out[0].substr(2, out[0].size())) + n - 1; // - 1;
+      dest = stoull(out[2].substr(1, out[2].size())) + n - 1;   // - 1;
+      label = stoi(out[6]) + 1;
 
       // if we are running the pruning algorithm store the labels
       Aut.add_label(dest, label);

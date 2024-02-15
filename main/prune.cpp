@@ -11,7 +11,7 @@ int main(int argc, char** argv)
   uint_t n, base_ind, source;
   bool pruning, dot_format, dummy, suprema, compact;
   // read input from file
-  if(argc == 10)
+  if(argc == 9)
   { 
     // set input parameters
     in_file = std::string(argv[1]);
@@ -22,7 +22,6 @@ int main(int argc, char** argv)
     base_ind = atoi(argv[6]);
     suprema = atoi(argv[7]);
     dummy = atoi(argv[8]);
-    compact = atoi(argv[9]);
 
     #ifdef VERBOSE
     {
@@ -54,7 +53,8 @@ int main(int argc, char** argv)
 
   // prune input automaton using the partition refinement algorithm
   partition_refinement_pruning(P, Aut);
-  Aut.to_output_pruned_Wheeler(out_file, P, suprema, compact);
+  //Aut.to_output_pruned_Wheeler(out_file, P, suprema, compact);
+  Aut.to_output_pruned(out_file);
 
   return 0;
 }

@@ -37,7 +37,7 @@ public:
 		// iterate over edge list
 		for(uint_t i=0;i<edge_list.size();++i)
   		{
-    		int label =  seq_nt6_table[std::get<2>(edge_list[i])];
+    		int label =  std::get<2>(edge_list[i]);
     		add_edge(std::get<0>(edge_list[i]),std::get<1>(edge_list[i]),label,P);
   		}
   		// delete pointers to initial parts
@@ -102,9 +102,8 @@ public:
 	}
 
 	void add_dummy_state(partition& P){
-
 		// add dummy node in the partition
-		P.add_node(nodes, 126);
+		P.add_node(nodes, sigma_ascii - 1);
 		// add dummy node in the automaton
 		NFA.push_back(node());
 		// create new count value
@@ -114,18 +113,29 @@ public:
 		// make the dummy state the new source state
 		NFA[nodes].out = NFA[source].out;
 		NFA[nodes].count = NFA[source].count;
-		NFA[nodes].out_part = P.give_part(126);
+		NFA[nodes].out_part = P.give_part(sigma_ascii - 1);
 		// connect the old source to the new one
 		NFA[source].out = std::vector<uint_t>{nodes};
 		NFA[source].count = std::vector<uint_t*>{counts[nodes]}; 
 	}
 
+	void init_label_vector()
+	{
+		// init n labels to zero
+		labels = std::vector<char>(nodes,0);
+	}
+
 	void add_label(uint_t dest, char label){
 
-		if(labels.size() == 0)
-			labels = std::vector<char>(nodes,0);
-
-		labels[dest] = label;
+		if(labels[dest] == 0)
+		{
+			labels[dest] = label;
+		}
+		else if(labels[dest] != label)
+		{
+			std::cerr << "The input automaton is not input-consistent!" << std::endl;
+			exit(1);
+		}
 	}
 
 	void delete_counts()
@@ -134,8 +144,8 @@ public:
 		counts.shrink_to_fit();
 	}
 
-	/*  */
-	uint_t map_state_to_part(partition& P, bool pruned = false)
+	/* compute mapping between states and Wheeler order */
+	uint_t compute_mapping(partition& P, bool collapse)
 	{
 		// get head of the partition
 		part* curr = P.give_head();
@@ -147,45 +157,20 @@ public:
 			// interate over nodes in each part
 			for (const auto& e: *curr->nodes)
 			{
-				if( pruned ){ remove_deleted_edges(e); }
 				// add one count if the node has no edges
 				if( NFA[e].count.size() == 0 ){ NFA[e].count.resize(1); }
 				NFA[e].count[0] = new uint_t(cnt);
+				// increase counter if not collapsing parts
+				if(!collapse){cnt++;}
 			}
 			// increase counter
-			cnt++;
+			if(collapse)
+				cnt++;
 			// stop when reaching the last state
 			curr = curr->next;
 		}
 
 		return cnt;
-	}
-
-	/*
-		function to print the resulting pruned automaton to file
-	*/
-	void to_output_pruned(std::string out)
-	{
-		// fix automaton if we added the dummy state
-		if( nodes < NFA.size() )
-			NFA[source] = NFA[nodes];
-
-		// open output file 
-		std::ofstream ofile;
-		ofile.open(out); 
-		// scan the graph
-		for(uint_t i=0;i<nodes;++i)
-		{
-			for(uint_t j=0;j<NFA[i].out.size();++j)
-			{
-				if( *NFA[i].count[j] > 0 )
-				{
-					ofile << i << " " << labels[NFA[i].out[j]] << " " << NFA[i].out[j] << "\n";
-				}
-			}
-		}
-		// close output file
-		ofile.close();
 	}
 
 	void to_output_Wheeler(std::string out, partition& P, bool compact = true)
@@ -205,7 +190,7 @@ public:
 		else
 			ofile.open(out); 
 		// compute mapping state -> part
-		n = map_state_to_part(P);
+		n = compute_mapping(P,true);
 		// init indegree vector or write no. states to file
 		if( compact )
 		{
@@ -213,7 +198,7 @@ public:
 			in_l = std::vector<uint_t>(sigma_ascii,0);
 		}
 		else
-			ofile << n << "\n";
+			ofile << "strict digraph {\n";
 		// set current part to head of partition
 		part* curr = P.give_head();
 		// iterate over partition and output automaton
@@ -241,10 +226,10 @@ public:
 						if( compact )
 							{
 								out_d++; in_d[op]++; in_l[labels[o]]++;
-								L << labels[o]; 
+								L << char(labels[o] - 1); 
 							}
 						else
-							ofile << b << " " << labels[o] << " " << op << "\n";
+							ofile << "	S" << b+1 << " -> S" << op+1 << " [ label = " << uint_t(labels[o] - 1) << " ];\n";
 						// increase edges count
 						m++;
 						// update set
@@ -254,7 +239,7 @@ public:
 			}
 			// write out degree if needed
 			if( compact )
-				Out << out_d << "\n";
+				Out << std::string(out_d,'0') << '1';
 			// stop when reaching the last state
 			curr = curr->next;
 		}
@@ -263,27 +248,52 @@ public:
 		{
 			// write in degrees
 			for(uint_t i=0;i<n;++i)
-				In << in_d[i] << "\n";
+				In << std::string(in_d[i],'0') << '1';
 			// close streams
 			L.close(); In.close(); Out.close(); 
 		}
 		else
-			ofile.close(); 
-	}
-
-	void remove_deleted_edges(uint_t e)
-	{
-		// remove an edge if its count is equal to zero
-		for(uint_t i=0;i<NFA[e].out.size();++i)
 		{
-			if(*NFA[e].count[i] == 0){ NFA[e].out[i] = U_MAX; }
+			ofile << "}";
+			ofile.close(); 
 		}
 	}
 
 	/*
 		function to print the resulting pruned automaton to file
 	*/
-	void to_output_pruned_Wheeler(std::string out, partition& P, bool suprema, bool compact = true)
+	void to_output_pruned(std::string out)
+	{
+		// fix automaton if we added the dummy state
+		if( nodes < NFA.size() )
+			NFA[source] = NFA[nodes];
+
+		// open output file 
+		std::ofstream ofile;
+		ofile.open(out); 
+		// write first line
+		ofile << "strict digraph {\n";
+		// scan the graph
+		for(uint_t i=0;i<nodes;++i)
+		{
+			for(uint_t j=0;j<NFA[i].out.size();++j)
+			{
+				if( *NFA[i].count[j] > 0 )
+				{
+					// ofile << i << " " << labels[NFA[i].out[j]] << " " << NFA[i].out[j] << "\n";
+					ofile << "	S" << i+1 << " -> S" << NFA[i].out[j]+1 << " [ label = " << uint_t(labels[NFA[i].out[j]] - 1) << " ];\n";
+				}
+			}
+		}
+		// write dot last line
+		ofile << "}";
+		// close output file
+		ofile.close();
+	}
+
+	/*
+		function to print the resulting pruned automaton to file
+	void to_output_infsup_Wheeler(std::string out, partition& P, bool compact = true)
 	{
 		// initialize and open output files
 		std::ofstream ofile, L, In, Out;
@@ -292,7 +302,6 @@ public:
 		std::vector<uint_t> in_d;
 		// mapping state to part
 		std::vector<uint_t> mapping;
-		mapping.resize(nodes);
 		// vector storing 
 		if( compact )
 		{
@@ -301,31 +310,23 @@ public:
 		else
 			ofile.open(out); 
 		// compute mapping state -> part
-		n = map_state_to_part(P,true);
-		if( suprema ){ n--; }
+		n = compute_mapping(P,false);
 		// init indegree vector or write no. states to file
 		if( compact ){ in_d = std::vector<uint_t>(n,0); }
 		else
-			ofile << n << "\n";
+			ofile << "strict digraph {\n";
+			//ofile << n << "\n";
 		// set current part to head of partition
 		part* curr = P.give_head();
-		if( suprema )
-		{
-			curr->next->prev = nullptr;
-			/* curr = curr->next; */
-			curr = NFA[nodes].out_part;
-		}
 		// iterate over partition and output automaton
 		while(curr != nullptr)
 		{	
-			// set containing reached states
-			std::unordered_set<uint_t> dest_map;
-			// set outdegree to zero
-			out_d = 0;
 			// iterate over nodes in part
 			for (const auto& e: *curr->nodes)
 			{
-				//std::cout << e << std::endl;
+				// set outdegree to zero
+				out_d = 0;
+				// std::cout << "e: " << e << "\n";
 				// beginning state
 				uint_t b = *(NFA[e].count)[0];
 				// iterate over outgoing edges
@@ -333,53 +334,47 @@ public:
 				{
 					// compute reached state and label
 					uint_t o = NFA[e].out[i];
-					// proceed in case of a non deleted edge
-					if( o != U_MAX )
+					// compute reached state
+					uint_t op = *(NFA[o].count)[0];
+
+					// increase in and out degree counter or write edge
+					if( compact )
 					{
-						uint_t op = *(NFA[o].count)[0];
-						// check if destination has already been reached
-						if(dest_map.find(op) == dest_map.end())
-						{
-							// increase in and out degree counter or write edge
-							if( compact )
-								{
-									out_d++; in_d[op]++;
-									L << labels[o]; 
-								}
-							else
-							{
-								if(suprema){ ofile << n-b << " " << labels[o] << " " << n-op << "\n"; }
-								else{ ofile << b << " " << labels[o] << " " << op << "\n"; }
-							}
-							// increase edges count
-							m++;
-							// update set
-							dest_map.insert(op);
-						}
+						out_d++; in_d[op]++;
+						L << char(labels[o] - 1); 
+					}
+					else
+					{
+						//ofile << b << " " << labels[o] << " " << op << "\n"; 
+						ofile << "	S" << b+1 << " -> S" << op+1 << " [ label = " << uint_t(labels[o] - 1) << " ];\n";
+						//std::cout << "	S" << b+1 << " -> S" << op+1 << " [ label = " << uint_t(labels[o]) << " ];\n";
 					}
 				}
+				// write out degree if needed
+				if( compact )
+					Out << std::string(out_d,'0') << '1';
 			}
-			// write out degree if needed
-			if( compact )
-				Out << out_d << "\n";
 			// stop when reaching the last state
-			if( suprema )
-				curr = curr->prev;
-			else
-				curr = curr->next;
+			curr = curr->next;
 		}
 		// close output files
 		if( compact )
 		{
 			// write in degrees
 			for(uint_t i=0;i<n;++i)
-				In << in_d[i] << "\n";
+				In << std::string(in_d[i],'0') << '1';
+				//In << in_d[i] << "\n";
 			// close output streams
 			L.close(); In.close(); Out.close(); 
 		}
 		else
+		{
+			// write dot last line
+			ofile << "}";
 			ofile.close(); 
+		}
 	}
+	*/
 
 	/*
 		function to store node positios in the partition
@@ -434,8 +429,7 @@ private:
 };
 
 /*
-	node of the NFA
-*/
+// node of the NFA
 struct in_node
 {
 	// out edges
@@ -488,6 +482,6 @@ private:
 	// vector containing all edges
 	std::vector<in_node> NFA;
 };
-
+*/
 
 #endif

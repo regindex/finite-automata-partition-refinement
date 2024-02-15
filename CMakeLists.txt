@@ -79,8 +79,3 @@ target_compile_options(merge64.x PUBLIC "-DM64")
 
 add_executable(merge64-verb.x main/merge.cpp lib/part_ref.cpp)
 target_compile_options(merge64-verb.x PUBLIC "-DM64" "-DVERBOSE")
-
-add_executable(join32.x main/join.cpp)
-
-add_executable(join64.x main/join.cpp)
-target_compile_options(join64.x PUBLIC "-DM64")

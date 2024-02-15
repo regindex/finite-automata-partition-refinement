@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, time, argparse, subprocess, os.path
+import sys, time, argparse, subprocess, os.path, glob
 
 Description = """
 Tool to sort and prune finite automata using the partition refinement algorithm.
@@ -19,18 +19,21 @@ merge32_exe            =  os.path.join(dirname, "build/merge32.x")
 merge64_exe            =  os.path.join(dirname, "build/merge64.x")
 merge32_verb_exe      =  os.path.join(dirname, "build/merge32-verb.x")
 merge64_verb_exe       =  os.path.join(dirname, "build/merge64-verb.x")
+join64_exe       =  os.path.join(dirname, "build/join64.x")
 
 def main():
     parser = argparse.ArgumentParser(description=Description, formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('input', help='automaton file path', type=str)
     parser.add_argument('-outpath', help='output file basename (def. filename.part)', default = "", type=str)
     parser.add_argument('--sort', help='sort a (Pseudo-)Wheeler automaton using the partition refinement algorithm (def. False)', action='store_true')
-    parser.add_argument('--prune', help='compute pruned automata recognizing infima and suprema strings (def. False)', action='store_true')
+    parser.add_argument('--prune', help='compute pruned (infsup-automaton) automaton recognizing infima and suprema strings (def. False)', action='store_true')
     parser.add_argument('--intervals', help='compute the colex. intervals of the input automaton (def. False)', action='store_true')
     parser.add_argument('--compact', help='write the output automata in compact format (def. False)', action='store_true')
-    parser.add_argument('--dot', help='take in input a dot file (def. False)', action='store_true')
-    parser.add_argument('--source', help='Only for .dot inputs, define the source state of the input automaton (def. 0)', default = 0, type=int)
-    parser.add_argument('--idbase1', help='activate if state ids start from 1 rather than from 0 (def. False)', action='store_true')
+    parser.add_argument('--intermediate', help='take in input an intermediate file instead of a .dot file (def. False)', action='store_true')
+    parser.add_argument('--keep', help='keep intermediate files (def. False)', action='store_true')
+    #parser.add_argument('--dot', help='take in input a dot file (def. False)', action='store_true')
+    #parser.add_argument('--source', help='Only for .dot inputs, define the source state of the input automaton (def. 0)', default = 0, type=int)
+    #parser.add_argument('--idbase1', help='activate if state ids start from 1 rather than from 0 (def. False)', action='store_true')
     parser.add_argument('--verbose',  help='verbose mode on (def. False)',action='store_true')
     args = parser.parse_args()
 
@@ -39,16 +42,20 @@ def main():
     args.main_dir = os.path.split(sys.argv[0])[0]
     print("Sending logging messages to file:", logfile_name)
     if(args.outpath == ""):
-        args.outpath = args.input
+        args.outpath = args.input.split(".")[0]
 
     # compute number of nodes and source state
     # for dot file we assume the source state is labelled either with 0 or 1
     no_nodes = 0
-    if( args.dot ):
+    if( args.intermediate == False ):
         command = "gc -n {input}".format(input=args.input)
         print("Counting number of nodes in " + args.input + " file...")
         out = subprocess.check_output(command.split())
         args.no_nodes = int(out.split()[0])
+        # set other flaga for dot files
+        args.idbase1 = True
+        args.dot = True
+        args.source = 0
     else:
         with open(args.input, "rb") as file:
             header = file.readline().split()
@@ -82,6 +89,7 @@ def main():
                 args.exe = partref64_verb_exe
                 args.exe_prune = prune64_verb_exe
                 args.exe_merge = merge64_verb_exe
+        args.exe_join = join64_exe
 
         # choose the correct algorithm #
         if args.sort:
@@ -89,46 +97,66 @@ def main():
             # standard partition refinement algorithm #
             command = "{exe} {file} {ofile} {nodes} {source} {startind} {dot} {compact}".format(
                     exe = os.path.join(args.main_dir,args.exe), file=args.input,
-                    ofile = args.outpath + ".part", nodes=args.no_nodes, source=args.source,
+                    ofile = args.outpath + ".part.dot", nodes=args.no_nodes, source=args.source,
                     startind=int(args.idbase1), dot=int(args.dot), compact=int(args.compact))
 
             print("==== sorting a (Pseudo)-Wheeler automaton using the partition refinement algorithm. Command: ", command)
             if(execute_command(command,logfile,logfile_name)!=True):
                 return
 
-        elif args.prune:
+        elif args.prune or args.intervals:
 
             # pruning algoritm - infima strings #
-            command = "{exe} {file} {ofile} {nodes} {source} {dot} {startind} 0 0 {compact}".format(
+            command = "{exe} {file} {ofile} {nodes} {source} {dot} {startind} 0 0".format(
                     exe = os.path.join(args.main_dir,args.exe_prune), file=args.input,
-                    ofile = args.outpath + ".infima", nodes=args.no_nodes, source=args.source,
-                    dot=int(args.dot), startind=int(args.idbase1), compact=int(args.compact))
+                    ofile = args.outpath + ".infima.dot", nodes=args.no_nodes, source=args.source,
+                    dot=int(args.dot), startind=int(args.idbase1))
 
             print("==== pruning infima strings automaton. Command: ", command)
             if(execute_command(command,logfile,logfile_name)!=True):
                 return
 
             # pruning algoritm - suprema strings #
-            command = "{exe} {file} {ofile} {nodes} {source} {dot} {startind} 1 1 {compact}".format(
+            command = "{exe} {file} {ofile} {nodes} {source} {dot} {startind} 1 1".format(
                     exe = os.path.join(args.main_dir,args.exe_prune), file=args.input,
-                    ofile = args.outpath + ".suprema", nodes=args.no_nodes, source=args.source,
-                    dot=int(args.dot), startind=int(args.idbase1), compact=int(args.compact))
+                    ofile = args.outpath + ".suprema.dot", nodes=args.no_nodes, source=args.source,
+                    dot=int(args.dot), startind=int(args.idbase1))
 
             print("==== pruning suprema strings automaton. Command: ", command)
             if(execute_command(command,logfile,logfile_name)!=True):
                 return
 
-        if args.intervals:
+        if args.prune:
 
-            # pruning algorithm + marging infima and suprema automata #
-            command = "{exe} {file} {ofile} {nodes} {source} {dot} {startind}".format(
-                    exe = os.path.join(args.main_dir,args.exe_merge), file=args.input,
-                    ofile = args.outpath + ".part", nodes=args.no_nodes, source=args.source,
-                    dot=int(args.dot), startind=int(args.idbase1))
+            # computing the infsup automaton #
+            command = "{exe} {infima} {suprema} {ofile} {nodes} {source} 0 {compact}".format(
+                    exe = os.path.join(args.main_dir,args.exe_merge), infima = args.outpath + ".infima.dot",
+                    suprema = args.outpath + ".suprema.dot", ofile = args.outpath + ".infsup.dot",
+                    nodes=args.no_nodes, source=args.source, compact=int(args.compact))
 
-            print("==== sorting a (Pseudo)-Wheeler automaton using the partition refinement algorithm. Command: ", command)
+            print("==== computing infsup automaton. Command: ", command)
             if(execute_command(command,logfile,logfile_name)!=True):
                 return
+
+        elif args.intervals:
+
+            # computing the colex intervals #
+            command = "{exe} {infima} {suprema} {ofile} {nodes} {source} 1 {compact}".format(
+                    exe = os.path.join(args.main_dir,args.exe_merge), infima = args.outpath + ".infima.dot",
+                    suprema = args.outpath + ".suprema.dot", ofile = args.outpath + ".intervals",
+                    nodes=args.no_nodes, source=args.source, compact=int(args.compact))
+
+            print("==== computing the colex. intervals of the input automaton. Command: ", command)
+            if(execute_command(command,logfile,logfile_name)!=True):
+                return
+
+        if (args.prune or args.intervals) and (not args.keep):
+
+            # delete intermediate files
+            for filename in glob.glob(args.outpath + ".infima*"):
+                os.remove(filename) 
+            for filename in glob.glob(args.outpath + ".suprema*"):
+                os.remove(filename) 
 
         print("Elapsed time: {0:.4f}".format(time.time()-start))
 
