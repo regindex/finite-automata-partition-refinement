@@ -47,35 +47,35 @@ include_directories(internal)
 include_directories(lib)
 include_directories(main)
 
-add_executable(part-ref32.x main/sort.cpp lib/part_ref.cpp)
+#add_executable(part-ref32.x main/sort.cpp lib/part_ref.cpp)
 
-add_executable(part-ref32-verb.x main/sort.cpp lib/part_ref.cpp)
-target_compile_options(part-ref32-verb.x PUBLIC "-DVERBOSE")
+#add_executable(part-ref32-verb.x main/sort.cpp lib/part_ref.cpp)
+#target_compile_options(part-ref32-verb.x PUBLIC "-DVERBOSE")
 
-add_executable(part-ref64.x main/sort.cpp lib/part_ref.cpp)
-target_compile_options(part-ref64.x PUBLIC "-DM64")
+#add_executable(part-ref64.x main/sort.cpp lib/part_ref.cpp)
+#target_compile_options(part-ref64.x PUBLIC "-DM64")
 
-add_executable(part-ref64-verb.x main/sort.cpp lib/part_ref.cpp)
-target_compile_options(part-ref64-verb.x PUBLIC "-DM64" "-DVERBOSE")
+#add_executable(part-ref64-verb.x main/sort.cpp lib/part_ref.cpp)
+#target_compile_options(part-ref64-verb.x PUBLIC "-DM64" "-DVERBOSE")
 
-add_executable(prune32.x main/prune.cpp lib/part_ref.cpp)
+#add_executable(prune32.x main/prune.cpp lib/part_ref.cpp)
 
-add_executable(prune32-verb.x main/prune.cpp lib/part_ref.cpp)
-target_compile_options(prune32-verb.x PUBLIC "-DVERBOSE")
+#add_executable(prune32-verb.x main/prune.cpp lib/part_ref.cpp)
+#target_compile_options(prune32-verb.x PUBLIC "-DVERBOSE")
 
-add_executable(prune64.x main/prune.cpp lib/part_ref.cpp)
-target_compile_options(prune64.x PUBLIC "-DM64")
+#add_executable(prune64.x main/prune.cpp lib/part_ref.cpp)
+#target_compile_options(prune64.x PUBLIC "-DM64")
 
-add_executable(prune64-verb.x main/prune.cpp lib/part_ref.cpp)
-target_compile_options(prune64-verb.x PUBLIC "-DM64" "-DVERBOSE")
+#add_executable(prune64-verb.x main/prune.cpp lib/part_ref.cpp)
+#target_compile_options(prune64-verb.x PUBLIC "-DM64" "-DVERBOSE")
 
 add_executable(merge32.x main/merge.cpp lib/part_ref.cpp)
 
 add_executable(merge32-verb.x main/merge.cpp lib/part_ref.cpp)
 target_compile_options(merge32-verb.x PUBLIC "-DVERBOSE")
 
-add_executable(merge64.x main/merge.cpp lib/part_ref.cpp)
-target_compile_options(merge64.x PUBLIC "-DM64")
+#add_executable(merge64.x main/merge.cpp lib/part_ref.cpp)
+#target_compile_options(merge64.x PUBLIC "-DM64")
 
-add_executable(merge64-verb.x main/merge.cpp lib/part_ref.cpp)
-target_compile_options(merge64-verb.x PUBLIC "-DM64" "-DVERBOSE")
+#add_executable(merge64-verb.x main/merge.cpp lib/part_ref.cpp)
+#target_compile_options(merge64-verb.x PUBLIC "-DM64" "-DVERBOSE")

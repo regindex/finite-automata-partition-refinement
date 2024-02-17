@@ -17,7 +17,6 @@ To clone the repository, run:
 ```console
 git clone http://github.com/regindex/finite_automata-partition-refinement
 cd finite-automata-partition-refinement
-git submodule update --init --recursive
 ```
 
 ### Compile

@@ -8,23 +8,14 @@
 */
 struct part
 {
+	// free nodes pointer
+	~part(){ delete nodes; }
 	// Pointer to next part
     part* next;	
     // Pointer to previous part
     part* prev;	
     // set of nodes in the part
     std::unordered_set<uint_t>* nodes;
-};
-
-/* 
-	node of the compound block list C
-*/
-struct node_compound
-{
-	// Pointer to next part
-    part* first;	
-    // set of nodes in the part
-    part* last;
 };
 
 // Doubly linked list
@@ -115,6 +106,7 @@ public:
 			// check if the current part is the last one
 			if(curr->next == nullptr)
 			{ 
+				//std::cout << "QUI!\n";
 				if(curr->nodes->size() > 0)
 				{
 					prev->next = curr; 
@@ -125,6 +117,7 @@ public:
 				{
 					prev->next = nullptr;
 					firstC->second = prev;
+					delete curr;
 				}
 				break;
 			}
@@ -138,9 +131,8 @@ public:
 			}
 			else
 			{
-				part* temp = curr->next;
-				delete curr;
-				curr = temp;
+				curr = curr->next;
+				delete curr->prev;
 			}
 		}
 		// mark end of the compound block
@@ -164,8 +156,7 @@ public:
 			C.pop();
 			if(S->first != S->second)
 			{
-				found = true; break;
-			}
+				found = true; break; }
 		}
 		// handle case where no splitter is found
 		if( !found )
@@ -224,13 +215,9 @@ public:
 		lastP[oldP] = B;
 
 		if( first )
-		{
 			firstP.insert({newP, Cb});
-		}
 		else
-		{
 			lastP.insert({newP, Cb});
-		}
 	}
 
 	/*
@@ -412,10 +399,7 @@ public:
 	/*
 		insert a compound block in C
 	*/
-	void insert_C(std::pair<part*,part*>* c)
-	{
-		C.push(c);
-	}
+	void insert_C(std::pair<part*,part*>* c){ C.push(c); }
 
 	/*
 		return number of compound blocks

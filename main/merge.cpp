@@ -34,7 +34,7 @@ int main(int argc, char** argv)
     // parse input files
     parse_input_merge(infima_file,suprema_file,n,P,Aut); 
     // delete auxiliary data structures
-    Aut.delete_counts();
+    Aut.delete_counts_merge(n);
     P.delete_spoint();
     // search first compound block
     P.set_first_C_block();

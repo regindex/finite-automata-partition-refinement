@@ -6,6 +6,8 @@
 /* node of the NFA */
 struct node
 {
+	// free struct members
+	~node(){}
 	// out edges
 	std::vector<uint_t> out;
 	// pointer to partition	
@@ -20,6 +22,8 @@ class NFA_unidirectional_out_unlabelled{
 public:
 	// empty constructor
 	NFA_unidirectional_out_unlabelled(){}
+	// destructor
+	~NFA_unidirectional_out_unlabelled(){}
 	// constructor 
 	NFA_unidirectional_out_unlabelled(uint_t no_nodes, std::vector<std::tuple<uint_t,uint_t,int>>& edge_list, partition& P){
 		// set number of nodes
@@ -140,11 +144,17 @@ public:
 
 	void delete_counts()
 	{
-		counts.resize(0);
-		counts.shrink_to_fit();
+		delete counts[source];
+		counts.clear();
 	}
 
-	/* compute mapping between states and Wheeler order */
+	void delete_counts_merge(uint_t n)
+	{
+		delete counts[source]; delete counts[source+n];
+		counts.clear();
+	}
+
+	/* compute mapping between states and Wheeler order
 	uint_t compute_mapping(partition& P, bool collapse)
 	{
 		// get head of the partition
@@ -172,6 +182,32 @@ public:
 
 		return cnt;
 	}
+	*/
+
+	uint_t compute_mapping(partition& P)
+	{
+		// get head of the partition
+		part* curr = P.give_head();
+		// set node counter
+		uint_t cnt = 0;
+		// iterate over all parts
+		while(curr != nullptr)
+		{	
+			// interate over nodes in each part
+			for (const auto& e: *curr->nodes)
+			{
+				// add one count if the node has no edges
+				if( NFA[e].count.size() == 0 ){ NFA[e].count.push_back(new uint_t(0)); }
+				*(NFA[e].count[0]) = cnt;
+			}
+			// increase counter
+			cnt++;
+			// stop when reaching the last state
+			curr = curr->next;
+		}
+
+		return cnt;
+	}
 
 	void to_output_Wheeler(std::string out, partition& P, bool compact = true)
 	{
@@ -189,8 +225,9 @@ public:
 		}
 		else
 			ofile.open(out); 
+
 		// compute mapping state -> part
-		n = compute_mapping(P,true);
+		n = compute_mapping(P);
 		// init indegree vector or write no. states to file
 		if( compact )
 		{
@@ -427,61 +464,5 @@ private:
 	// tmp count vector
 	std::vector<uint_t*> counts;
 };
-
-/*
-// node of the NFA
-struct in_node
-{
-	// out edges
-	std::vector<uint_t> in;
-	// pointer to partition	
-	char label;
-};
-
-// class for directed unidirectional unlabeled NFA
-class NFA_unidirectional_in_unlabelled{
-
-public:
-	// empty constructor
-	NFA_unidirectional_in_unlabelled(){}
-	// initialize the empty NFA
-	NFA_unidirectional_in_unlabelled(uint_t no_nodes)
-	{
-		// set number of nodes
-		nodes = no_nodes;
-		edges = 0;
-		// initialize DFA
-		NFA.resize(nodes);
-	}
-
-	uint_t no_nodes(){ return nodes; }
-	uint_t no_edges(){ return edges; }
-
-	in_node* at(uint_t i){
-
-		assert(i < nodes);
-		// return pointer to node
-		return &NFA[i];
-	}
-
-	void add_edge(uint_t origin, uint_t dest, int label){
-
-		// insert out edge
-		NFA[dest].in.push_back(origin);
-		// set node label
-		NFA[dest].label = label;
-		// increment edge number
-		edges++;
-	}
-
-private:
-	// number of nodes in the DFA
-	uint_t nodes;
-	// number of edges in the DFA
-	uint_t edges;
-	// vector containing all edges
-	std::vector<in_node> NFA;
-};
-*/
 
 #endif

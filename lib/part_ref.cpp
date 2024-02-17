@@ -21,7 +21,11 @@ void PART_REF_WHEELER(partition& P, graph& NFA) {
 	    B->first = B->second = nullptr;
 
 	    // check termination condition
-	    if( S.second->first == nullptr ){ break; } 
+	    if( S.second->first == nullptr )
+	    { 
+	    	delete S.second; delete B;
+	    	break; 
+	    } 
 
 	    #ifdef VERBOSE
 		    {
@@ -182,6 +186,8 @@ void PART_REF_WHEELER(partition& P, graph& NFA) {
 	          		NFA.at(i)->out_part = part_D12;
 	        	}
 	      	}
+	      	else
+	      		delete entry.second.second;
 	      	// create D11 part
 	      	part* part_D11 = nullptr;
 	      	if( entry.second.first->size() > 0 )
@@ -194,6 +200,8 @@ void PART_REF_WHEELER(partition& P, graph& NFA) {
 	          	NFA.at(i)->out_part = part_D11;
 	        	}
 	      	}
+	      	else
+	      		delete entry.second.first;
 	      	// ###### insert new parts ######
 	      	part* first = nullptr; part* last = nullptr;
 	      	int no_new_parts = 1;
@@ -347,16 +355,17 @@ void PART_REF_PRUNE(partition& P, graph& DFA) {
 	// iterate until C is empty
 	while(true)
   	{
-  		//std::cout << "i:" << i; 
-  		//i++;
-  		//std::cout << "print new B\n";
   		// get splitter B and S_w_B
 	    std::pair<bool,std::pair<part*,part*>*> S = P.get_B();
 	    std::pair<part*,part*>* B = new std::pair<part*,part*>;
 	    B->first = B->second = nullptr;
 
 	    // check termination condition
-	    if( S.second->first == nullptr ){ break; } 
+	    if( S.second->first == nullptr )
+	    { 
+	    	delete S.second; delete B;
+	    	break; 
+	    } 
 
 	    #ifdef VERBOSE
 	    {
@@ -499,13 +508,12 @@ void PART_REF_PRUNE(partition& P, graph& DFA) {
 			        key->nodes->erase(entry.first);
 	    		}
 	    		else 
-	    		{
 	    			*entry.second.first = 0;
-	    		}
 	    	}
 	    	else // its D12
 	    	{
 	    		assert( *entry.second.second == 0 );
+	    		delete entry.second.second;
 
 	    		part* key =  DFA.at(entry.first)->out_part;
 	    		if( key->nodes->size() == 1 && D1.find(key) == D1.end() ){ continue; }
@@ -556,7 +564,6 @@ void PART_REF_PRUNE(partition& P, graph& DFA) {
 		}
 	    #endif
 		
-		// exit(1);
 	    // update the partition
 	    for (auto entry : D1)
 	    {
@@ -564,7 +571,6 @@ void PART_REF_PRUNE(partition& P, graph& DFA) {
 	      	part* part_D12 = nullptr;
 	     	if( entry.second.second->size() > 0 )
 	      	{
-	      		//std::cout << "ENTRATO\n";
 	        	part_D12 = new part();
 	        	part_D12->nodes = entry.second.second;
 	        	for (auto const &i: *part_D12->nodes)
@@ -572,6 +578,8 @@ void PART_REF_PRUNE(partition& P, graph& DFA) {
 	          		DFA.at(i)->out_part = part_D12;
 	        	}
 	      	}
+	      	else
+	      		delete entry.second.second;
 	      	// create D11 part
 	      	part* part_D11 = nullptr;
 	      	if( entry.second.first->size() > 0 )
@@ -584,12 +592,13 @@ void PART_REF_PRUNE(partition& P, graph& DFA) {
 	          	DFA.at(i)->out_part = part_D11;
 	        	}
 	      	}
+	      	else
+	      		delete entry.second.first;
 	      	// ###### insert new parts ######
 	      	part* first = nullptr; part* last = nullptr;
 	      	int no_new_parts = 1;
 	      	if( S.first ) // D12 D11 D2
 	      	{
-	      		//std::cout << "un first\n";
 	      		// create new D12 part
 	        	if(part_D12 != nullptr)
 	        	{

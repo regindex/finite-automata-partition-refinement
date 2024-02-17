@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 
     #ifdef VERBOSE
     {
-      std::cout << "initialize first partition...\n";
+      std::cout << "initialize partition..." << std::endl;
     }
     #endif
     
@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 
     #ifdef VERBOSE
     {
-      std::cout << "initialize automaton...\n";
+      std::cout << "initialize automaton..." << std::endl;
     }
     #endif
 
@@ -49,11 +49,17 @@ int main(int argc, char** argv)
     // search first compound block
     P.set_first_C_block();
   }
-  else{ std::cerr << "invalid no. arguments\n"; exit(1); }
+  else{ std::cerr << "invalid no. arguments" << std::endl; exit(1); }
+
+  #ifdef VERBOSE
+  {
+    std::cout << "running pruning algorithm..." << std::endl;
+  }
+  #endif
 
   // prune input automaton using the partition refinement algorithm
   partition_refinement_pruning(P, Aut);
-  //Aut.to_output_pruned_Wheeler(out_file, P, suprema, compact);
+  // write output pruned automaton to file
   Aut.to_output_pruned(out_file);
 
   return 0;
