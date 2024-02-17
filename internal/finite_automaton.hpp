@@ -1,5 +1,5 @@
-#ifndef NFA_HPP_
-#define NFA_HPP_
+#ifndef FINITE_AUTOMATON_HPP_
+#define FINITE_AUTOMATON_HPP_
 
 #include "partition.hpp"
 
@@ -465,4 +465,4 @@ private:
 	std::vector<uint_t*> counts;
 };
 
-#endif
+#endif /* FINITE_AUTOMATON */

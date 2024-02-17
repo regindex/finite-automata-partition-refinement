@@ -19,7 +19,6 @@ merge32_exe            =  os.path.join(dirname, "build/merge32.x")
 merge64_exe            =  os.path.join(dirname, "build/merge64.x")
 merge32_verb_exe      =  os.path.join(dirname, "build/merge32-verb.x")
 merge64_verb_exe       =  os.path.join(dirname, "build/merge64-verb.x")
-join64_exe       =  os.path.join(dirname, "build/join64.x")
 
 def main():
     parser = argparse.ArgumentParser(description=Description, formatter_class=argparse.RawTextHelpFormatter)
@@ -31,9 +30,6 @@ def main():
     parser.add_argument('--compact', help='write the output automata in compact format (def. False)', action='store_true')
     parser.add_argument('--intermediate', help='take in input an intermediate file instead of a .dot file (def. False)', action='store_true')
     parser.add_argument('--keep', help='keep intermediate files (def. False)', action='store_true')
-    #parser.add_argument('--dot', help='take in input a dot file (def. False)', action='store_true')
-    #parser.add_argument('--source', help='Only for .dot inputs, define the source state of the input automaton (def. 0)', default = 0, type=int)
-    #parser.add_argument('--idbase1', help='activate if state ids start from 1 rather than from 0 (def. False)', action='store_true')
     parser.add_argument('--verbose',  help='verbose mode on (def. False)',action='store_true')
     args = parser.parse_args()
 
@@ -89,7 +85,6 @@ def main():
                 args.exe = partref64_verb_exe
                 args.exe_prune = prune64_verb_exe
                 args.exe_merge = merge64_verb_exe
-        args.exe_join = join64_exe
 
         # choose the correct algorithm #
         if args.sort:

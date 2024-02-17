@@ -8,7 +8,8 @@
 
 * A modern C++17 compiler such as `g++` version 8.4 or higher.
 * The cmake build system, version \geq 3.10.
-* A Linux 64-bit operating system.
+* A Linux or MacOS 64-bit operating system.
+* The Graphviz software.
 
 ### Download
 

@@ -2,7 +2,7 @@
 #define PART_REF_H
 
 #include "internal/definitions.hpp"
-#include "internal/automaton.hpp"
+#include "internal/finite_automaton.hpp"
 
 typedef NFA_unidirectional_out_unlabelled graph; 
 

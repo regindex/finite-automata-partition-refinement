@@ -3,7 +3,7 @@
 
 #include "internal/definitions.hpp"
 #include "internal/partition.hpp"
-#include "internal/automaton.hpp"
+#include "internal/finite_automaton.hpp"
 
 /* parse an edge line */
 void tokenize(std::string const &str, const char delim, 
