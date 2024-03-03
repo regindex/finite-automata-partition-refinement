@@ -38,8 +38,8 @@ int main(int argc, char** argv)
     #endif
 
     // initialize the automaton
-    Aut = graph(n);
-    Aut.set_source(source);
+    Aut = graph(n,source);
+    // Aut.set_source(source);
     // parse input file
     parse_input_file(in_file,P,Aut,dot_format,base_ind); 
     // delete ausiliary data structures

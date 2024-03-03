@@ -57,6 +57,8 @@ def main():
             header = file.readline().split()
             args.no_nodes = int(header[0])
             args.source = int(header[2])
+        args.idbase1 = False
+        args.dot = False
     
     with open(logfile_name,"a") as logfile:
 

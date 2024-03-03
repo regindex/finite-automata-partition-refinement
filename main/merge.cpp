@@ -30,7 +30,7 @@ int main(int argc, char** argv)
     // add second source
     P.add_source(source+n);
     // initialize the automaton
-    Aut = graph(n*2);
+    Aut = graph(n*2,source);
     // parse input files
     parse_input_merge(infima_file,suprema_file,n,P,Aut); 
     // delete auxiliary data structures

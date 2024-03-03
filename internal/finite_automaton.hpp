@@ -49,15 +49,15 @@ public:
   		counts.resize(0); counts.shrink_to_fit();
 	}
 	// initialize the empty NFA
-	NFA_unidirectional_out_unlabelled(uint_t no_nodes){
-		// set number of nodes
-		nodes = no_nodes;
+	NFA_unidirectional_out_unlabelled(uint_t nodes_, uint_t source_): nodes(nodes_), source(source_)
+	{
+		// set edge number
 		edges = 0;
 		// initialize DFA
 		NFA.resize(nodes);
 		// initialize counts
-		counts.resize(no_nodes);
-		for(uint_t i=0;i<no_nodes;++i)
+		counts.resize(nodes);
+		for(uint_t i=0;i<nodes;++i)
 		{
 			counts[i] = new uint_t;
 			*counts[i] = 0;
