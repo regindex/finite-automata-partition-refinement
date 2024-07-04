@@ -204,6 +204,27 @@ public:
 	}
 
 	/*
+		add a node in one of the initial part of the pruning algorithm
+	*/
+	void add_node_prune(uint_t dest, int oldlabel, int label, bool suprema)
+	{
+		if(oldlabel > -1)
+		{
+			// if we are pruning some edges remove node
+			// from the old partition
+			if(oldlabel > 0)
+			{
+				if(suprema)
+					oldlabel = sigma_ascii - oldlabel - 1;
+				spoint[oldlabel]->nodes->erase(dest);
+			}
+			// add node in a part
+			spoint[label]->nodes->insert(dest);
+		}
+	}
+
+
+	/*
 		update the table containing the pointers at the first and last parts of the
 		compound blocks
 	*/

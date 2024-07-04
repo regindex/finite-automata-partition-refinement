@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     Aut = graph(n,source);
     // Aut.set_source(source);
     // parse input file
-    parse_input_file(in_file,P,Aut,dot_format,base_ind,suprema,dummy); 
+    parse_input_file_prune(in_file,P,Aut,dot_format,base_ind,suprema,dummy); 
     // delete auxiliary data structures
     Aut.delete_counts();
     P.delete_spoint();

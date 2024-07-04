@@ -32,7 +32,7 @@ int main(int argc, char** argv)
     // initialize the automaton
     Aut = graph(n*2,source);
     // parse input files
-    parse_input_merge(infima_file,suprema_file,n,P,Aut); 
+    parse_input_file_merge(infima_file,suprema_file,n,P,Aut); 
     // delete auxiliary data structures
     Aut.delete_counts_merge(n);
     P.delete_spoint();

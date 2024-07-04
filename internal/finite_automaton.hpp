@@ -105,6 +105,29 @@ public:
 		edges++;
 	}
 
+	/*
+	void add_edge_prune(uint_t origin, uint_t dest, int label, partition& P,
+						std::vector<std::unordered_set<uint_t>>& in_nodes, bool prune){
+
+		if(prune)
+			in_nodes[dest].clear();
+		// insert in node
+		in_nodes[dest].insert(origin);
+		// insert out edge
+		NFA[origin].out.push_back(dest);
+		// insert pointer to part
+		if(NFA[dest].out_part == nullptr)
+		{
+			NFA[dest].out_part = P.give_part(label);
+		}
+		// insert pointer to count in the edge
+		NFA[origin].count.push_back(counts[dest]);
+		*counts[dest] += 1;
+		// increment edge number
+		edges++;
+	}
+	*/
+
 	void add_dummy_state(partition& P){
 		// add dummy node in the partition
 		P.add_node(nodes, sigma_ascii - 1);
@@ -129,8 +152,8 @@ public:
 		labels = std::vector<char>(nodes,0);
 	}
 
-	void add_label(uint_t dest, char label){
-
+	void add_label(uint_t dest, char label)
+	{
 		if(labels[dest] == 0)
 		{
 			labels[dest] = label;
@@ -140,6 +163,37 @@ public:
 			std::cerr << "The input automaton is not input-consistent!" << std::endl;
 			exit(1);
 		}
+	}
+
+	int assign_remove_label(uint_t dest, char label, bool suprema)
+	{
+		int flag = 0; // by default we do not change the label assigned
+					  // to a node 
+		if(labels[dest] == 0)
+			labels[dest] = label;
+		else if(labels[dest] != label)
+		{
+			flag = -1; // if the new label is different than the current one
+					   // we remove one of the two --> by default we remove
+					   // the new one.
+			if(suprema)
+			{
+				if(label > labels[dest])
+				{
+					flag = labels[dest]; // remove the previous label
+					labels[dest] = label;
+				}
+			}
+			else
+			{
+				if(label < labels[dest])
+				{
+					flag = labels[dest]; // remove the previous label
+					labels[dest] = label;
+				}
+			}
+		}
+		return flag;
 	}
 
 	void delete_counts()
