@@ -5,6 +5,7 @@
 #include "internal/finite_automaton.hpp"
 
 typedef NFA_unidirectional_out_unlabelled graph; 
+typedef Automata_input_consistent IC_graph; 
 
 /**
  * @brief Sort a (Pseudo-)Wheeler automaton using the partition refinement algorithm

@@ -48,8 +48,7 @@ int main(int argc, char** argv)
     Aut.store_state_intervals(out_file, P, n);
   else
   {
-    //Aut.to_output_infsup_Wheeler(out_file + ".dot", P, compact);
-    Aut.to_output_Wheeler(out_file, P, compact);
+    Aut.to_output_Wheeler_pforest(out_file, P, compact);
     P.to_file(out_file+".mapping");
   }
 

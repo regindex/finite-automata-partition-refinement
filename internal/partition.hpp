@@ -86,8 +86,8 @@ public:
 		prev->next = nullptr;
 	}
 
-	void add_source(uint_t source){
-
+	void add_source(uint_t source)
+	{
 		// add new source to head node
 		head->nodes->insert(source);
 	}
@@ -302,6 +302,7 @@ public:
 		{
 			for (auto const &i: *curr->nodes)
 			{
+				//std::cout << i << " ";
         		if(fwrite(&i,sizeof(uint_t),1,out_file) != 1)
         		{
         			std::cerr << "Out file write error... exiting!" << std::endl;
@@ -309,6 +310,7 @@ public:
         		}
     		}
     		// write separator
+    		//std::cout << "| ";
     		if(fwrite(&sep,sizeof(uint_t),1,out_file) != 1)
     		{
     			std::cerr << "Sep file write error... exiting!" << std::endl;
@@ -447,8 +449,30 @@ public:
 		new_part->next = temp;
 	}
 
+	/* free allocated memory */
+	void clear()
+	{
+		// clear partition
+		part* curr = head;
+		while(curr != nullptr)
+		{
+			part* tmp = curr->next;
+			delete curr;
+			curr = tmp;
+		}
+		spoint.clear(); spoint.shrink_to_fit();
+		while(C.size() > 0)
+		{
+			auto t = C.top();
+			C.pop();
+			delete t;
+		}
+		firstP.clear();
+		lastP.clear();
+	}
+
 private:
-	// number of edges in the NFA
+	// head of the partition
 	part* head;
 	// pointers to initial parts
 	std::vector<part*> spoint; 
@@ -459,6 +483,5 @@ private:
 	// last parts of compound blocks 
 	std::unordered_map<part*,std::pair<part*,part*>*> lastP;
 };
-
 
 #endif

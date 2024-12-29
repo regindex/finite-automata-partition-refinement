@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
+    http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+    <key id="chains" for="node" attr.name="chains" attr.type="int">
+        <default>-1</default> 
+    </key>
+    <key id="positions" for="node" attr.name="positions" attr.type="string">
+        <default>-1</default>
+    </key>
+    <key id="final" for="node" attr.name="final" attr.type="boolean">        
+        <default>false</default>
+    </key>
+    <key id="MN-class" for="node" attr.name="MN-class" attr.type="int"/>
+    <key id="label" for="edge" attr.name="label" attr.type="string"/>
+    <key id="initial_state" for="graph" attr.name="initial_state" attr.type="int">
+        <default>-1</default>
+    </key>
+    <graph id="G" edgedefault="directed">
+        <data key="initial_state">1</data>
+        
+        <!-- Node v1 -->
+        <node id="1">
+            <data key="final">0</data>
+        </node>
+        
+        <!-- Node v2 -->
+        <node id="2">
+            <data key="final">false</data>
+        </node>
+        
+        <!-- Node v3 -->
+        <node id="3">
+            <data key="final">false</data>
+        </node>
+        
+        <!-- Node v4 -->
+        <node id="4">
+            <data key="final">true</data>
+        </node>
+        
+        <!-- Node v5 -->
+        <node id="5">
+            <data key="final">true</data>
+        </node>
+        
+        <!-- Node v6 -->
+        <node id="6">
+            <data key="final">true</data>
+        </node>
+        
+        <!-- Node v7 -->
+        <node id="7">
+            <data key="final">false</data>
+        </node>
+
+        <!-- Node v8 -->
+        <node id="8">
+            <data key="final">true</data>
+        </node>
+        
+        <!-- Edges -->
+        <edge source="1" target="2">
+            <data key="label">B</data>
+        </edge>
+
+        <edge source="2" target="3">
+            <data key="label">B</data>
+        </edge>
+
+        <edge source="1" target="4">
+            <data key="label">C</data>
+        </edge>
+
+        <edge source="4" target="5">
+            <data key="label">A</data>
+        </edge>
+
+        <edge source="4" target="6">
+            <data key="label">B</data>
+        </edge>
+        <edge source="5" target="7">
+            <data key="label">C</data>
+        </edge>
+
+        <edge source="6" target="7">
+            <data key="label">A</data>
+        </edge>
+
+        <edge source="7" target="8">
+            <data key="label">B</data>
+        </edge>
+        
+    </graph>
+</graphml>

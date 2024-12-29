@@ -53,7 +53,7 @@ int main(int argc, char** argv)
   /* sort Aut automaton using the partition refinement algorithm */
   partition_refinement_Wheeler_automaton(P, Aut);
   /* write output files */
-  Aut.to_output_Wheeler(out_file, P, compact);
+  Aut.to_output_sorted(out_file, P, compact);
   P.to_file(out_file+".mapping");
 
   return 0;
