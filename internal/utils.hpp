@@ -4,7 +4,6 @@
 #include "internal/definitions.hpp"
 #include "internal/partition.hpp"
 #include "internal/finite_automaton.hpp"
-#include "external/tinyxml2/tinyxml2.h"
 #include "libxml/xmlreader.h"
 
 /* parse an edge line */
