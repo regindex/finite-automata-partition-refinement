@@ -70,7 +70,8 @@ int main(int argc, char** argv)
   /* compute the CFS partial order */
   OrderCFS partial_order_CFS(sorted);
   /* compute the chain decomposition given the hasse diagram */
-  auto cdec = get_chain_decomposition<uint_t>(partial_order_CFS.getTransitiveReduction());
+  //auto cdec = get_chain_decomposition<uint_t>(partial_order_CFS.getTransitiveReduction());
+  auto cdec = get_chain_decomposition<uint_t>(partial_order_CFS.getIncidenceMatrix());
 
   #ifdef VERBOSE
   {
