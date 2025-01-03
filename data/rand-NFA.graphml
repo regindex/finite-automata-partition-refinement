@@ -91,6 +91,14 @@
         <edge source="7" target="8">
             <data key="label">B</data>
         </edge>
+
+        <edge source="3" target="7">
+            <data key="label">A</data>
+        </edge>
+
+        <edge source="3" target="7">
+            <data key="label">T</data>
+        </edge>
         
     </graph>
 </graphml>

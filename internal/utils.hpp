@@ -27,9 +27,53 @@ typedef std::vector<std::tuple<uint_t,uint_t,char>> edge_list;
 */
 void enforce_input_consistency(partition& P, graph& Aut, edge_list& bad_edges) 
 {
-    std::unordered_map<uint_t,uint_t> mapping;
+    // each pair (new_x,x) tells that state new_x will reach all states reached
+    // by x in the final automaton.
+    std::unordered_map<uint_t,uint_t> mapping_new_states;
+    // each pair (x,c) tells that we split state x with label c
+    std::unordered_map<uint_t,std::unordered_map<char,uint_t>> mapping_split_states;
+
     for(size_t i=0;i<bad_edges.size();++i)
     {
+        /*std::cout << "## bad edge: " << std::get<0>(bad_edges[i]) << " -> "
+                                     << std::get<1>(bad_edges[i]) << " ["
+                                     << std::get<2>(bad_edges[i]) << "]" << std::endl; */
+        // if state std::get<1>(bad_edges[i]) hasn't been split yet
+        if(mapping_split_states.find(std::get<1>(bad_edges[i])) 
+                                 == mapping_split_states.end() or 
+           mapping_split_states[std::get<1>(bad_edges[i])].find(std::get<2>(bad_edges[i]))
+                                 == mapping_split_states[std::get<1>(bad_edges[i])].end())
+        {
+            uint_t new_id = Aut.no_nodes();
+            Aut.add_node();
+
+            Aut.add_label(new_id, std::get<2>(bad_edges[i]));
+            P.add_node(new_id, std::get<2>(bad_edges[i]));
+            //std::cout << "adding new state: " << new_id << std::endl;
+            Aut.add_edge(std::get<0>(bad_edges[i]), new_id, std::get<2>(bad_edges[i]), P);
+            /* std::cout << "adding edge: " << std::get<0>(bad_edges[i]) << " -> " << new_id
+                      << " [" << std::get<2>(bad_edges[i]) << "]" << std::endl; */
+
+            mapping_new_states[new_id] = std::get<1>(bad_edges[i]);
+            /* std::cout << "mapping_new_states: " << new_id << " - " 
+                                                << std::get<1>(bad_edges[i]) << std::endl; */
+            mapping_split_states[std::get<1>(bad_edges[i])].insert( std::make_pair(
+                                                        std::get<2>(bad_edges[i]),new_id) );
+            /*std::cout << "mapping_split_states: " << std::get<1>(bad_edges[i]) << " - (" 
+                                                  << std::get<2>(bad_edges[i]) << ","
+                                                  << new_id << ")" << std::endl; */
+        }
+        else
+        {
+            Aut.add_edge(
+                std::get<0>(bad_edges[i]), 
+                mapping_split_states[std::get<1>(bad_edges[i])][std::get<2>(bad_edges[i])],
+                std::get<2>(bad_edges[i]), P );
+            /*std::cout << "adding edge: " << std::get<0>(bad_edges[i]) << " -> " 
+                      << mapping_split_states[std::get<1>(bad_edges[i])][std::get<2>(bad_edges[i])]
+                      << " [" << std::get<2>(bad_edges[i]) << "]" << std::endl; */
+        }
+        /*
         uint_t new_id = Aut.no_nodes();
         Aut.add_node();
 
@@ -37,17 +81,19 @@ void enforce_input_consistency(partition& P, graph& Aut, edge_list& bad_edges)
         P.add_node(new_id, std::get<2>(bad_edges[i]));
         Aut.add_edge(std::get<0>(bad_edges[i]), new_id, std::get<2>(bad_edges[i]), P);
 
-        mapping[new_id] = std::get<1>(bad_edges[i]);
+        mapping_new_states[new_id] = std::get<1>(bad_edges[i]);
+        */
     }
     // connect the new states in the automaton
-    for(auto i=mapping.begin();i!=mapping.end();++i)
+    for(auto i=mapping_new_states.begin();i!=mapping_new_states.end();++i)
     {
         auto edges = Aut.at(i->second);
         for(size_t i_=0;i_<edges->out.size();++i_)
         {
             uint_t origin = i->first;
             uint_t dest = edges->out.at(i_);
-            //std::cout << "add edge: " << origin << " " << dest << " " << Aut.give_labels()->at(dest) << std::endl;
+            /* std::cout << "add edge_: " << origin << " -> " 
+                      << dest << " [" << Aut.give_labels()->at(dest) << "]" << std::endl; */
 
             Aut.add_edge(origin,dest,Aut.give_labels()->at(dest),P);
         }
