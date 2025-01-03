@@ -15,7 +15,7 @@
 To clone the repository and install the dependencies, run:
 
 ```console
-git clone http://github.com/regindex/finite_automata-partition-refinement
+git clone --branch develop --single-branch https://github.com/regindex/finite-automata-partition-refinement.git
 cd finite-automata-partition-refinement
 git submodule update --init --recursive
 python3 install_dependencies.py external/libxml2/
